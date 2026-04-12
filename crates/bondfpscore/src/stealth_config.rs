@@ -10,7 +10,8 @@ struct StealthConfigFile {
     global: Global,
     posture_factors: PostureFactors,
     movement_factors: MovementFactors,
-    // sound omitted for now
+    #[allow(dead_code)]
+    sound: Option<SoundSection>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -36,6 +37,14 @@ struct MovementFactors {
     still: f32,
     walk: f32,
     run: f32,
+}
+
+#[derive(Debug, Deserialize)]
+struct SoundSection {
+    enabled: bool,
+    max_distance: f32,
+    weapon_loudness: Option<std::collections::HashMap<String, f32>>,
+    footstep_loudness: Option<std::collections::HashMap<String, f32>>,
 }
 
 pub fn load_stealth_params<P: AsRef<Path>>(path: P) -> Result<StealthParams, String> {
