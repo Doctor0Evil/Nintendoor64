@@ -1,8 +1,18 @@
-//! Bond-like FPS Stealth AI: detection and awareness model.
+//! Bond-like / PD-style stealth and guard awareness model.
 //!
-//! This module implements a continuous visibility score V and an awareness
-//! accumulator A per guard, using tunable parameters so designers (or Lua)
-//! can tweak stealth behavior without touching the core math.
+//! This module is intended ONLY for the Bond-like / stealth FPS core.
+//! It provides:
+//! - Vec3 helper (you can later replace with glam/nalgebra).
+//! - GuardStealthState component (per-guard awareness and state).
+//! - StealthParams resource (global tuning).
+//! - DetectionInputs for per-guard visibility evaluation.
+//! - Pure math helpers: f_d, f_L, posture_factor, movement_factor.
+//! - A deterministic tick_guard_stealth() step used by a StealthSystem.
+//!
+//! Core model (vision only, sound can be added later):
+//!   V = B_base * f_d(d) * f_L(L) * f_P(P) * f_M(M)
+//!   A(t+dt) = clamp( A(t) + V_total * dt - k_decay * dt, 0, 1 )
+//! where V_total = V_vision (+ V_sound, later).
 
 use std::f32::consts::PI;
 
@@ -92,7 +102,7 @@ impl GuardStealthState {
 /// and cached in a resource in your ECS world.
 #[derive(Debug, Clone)]
 pub struct StealthParams {
-    /// Base detectability constant.
+    /// Base detectability constant (B_base).
     pub base_visibility: f32,
     /// Maximum distance at which player can ever be detected.
     pub max_distance: f32,
@@ -153,6 +163,8 @@ pub struct DetectionInputs {
 }
 
 /// Compute distance-based falloff f_d(d) in [0, 1].
+///
+/// f_d(d) = max(0, 1 - d / d_max) ^ exponent.
 fn distance_factor(d: f32, max_distance: f32, exponent: f32) -> f32 {
     if d <= 0.0 {
         1.0
@@ -188,7 +200,7 @@ fn movement_factor(movement: MovementState, params: &StealthParams) -> f32 {
     }
 }
 
-/// Compute instantaneous visibility score V.
+/// Compute instantaneous visibility score V (vision only).
 ///
 /// If there is no line of sight, V is forced to 0. You can extend this later
 /// with sound-based detection by adding a separate hearing term.
