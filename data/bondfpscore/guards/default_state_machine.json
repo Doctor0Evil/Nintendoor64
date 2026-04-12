@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "profile_id": "bond.guard.default",
+  "thresholds": {
+    "t_suspicious": 0.35,
+    "t_alert": 0.7,
+    "decay": 0.15
+  }
+}
