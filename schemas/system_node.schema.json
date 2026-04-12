@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://doctor0evil.github.io/GAMEMODE.ai/schemas/system_node.schema.json",
+  "title": "SystemNode",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "kind", "tags", "paths", "description"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Globally unique system identifier.",
+      "minLength": 1
+    },
+    "kind": {
+      "type": "string",
+      "description": "Type of node in the knowledge graph.",
+      "enum": ["System", "Asset", "Recipe", "Tool", "Session"]
+    },
+    "tags": {
+      "type": "array",
+      "description": "Semantic tags for filtering and navigation.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "paths": {
+      "type": "array",
+      "description": "Repo-relative file paths implementing this node.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "repo": {
+      "type": "string",
+      "description": "Canonical GitHub repository (owner/name) hosting these files.",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Short, human-readable description for AI context.",
+      "minLength": 1
+    },
+    "depends_on": {
+      "type": "array",
+      "description": "IDs of other SystemNodes this node depends on.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "provides": {
+      "type": "array",
+      "description": "Capabilities or features exposed by this node.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    }
+  }
+}
