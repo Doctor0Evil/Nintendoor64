@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bond Lock-On Profile",
+  "type": "object",
+  "required": ["schema_version", "profile_id", "angle_deg", "distance_max"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "angle_deg": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 90.0
+    },
+    "distance_max": {
+      "type": "number",
+      "exclusiveMinimum": 0.0
+    }
+  }
+}
