@@ -1,0 +1,23 @@
+# File: config/bondfpscore_stealth.toml
+
+[stealth]
+max_vision_distance      = 25.0
+vision_distance_gamma    = 1.5
+
+light_gamma              = 1.2
+
+posture_standing         = 1.0
+posture_crouched         = 0.6
+posture_prone            = 0.3
+
+movement_still           = 0.5
+movement_walk            = 1.0
+movement_run             = 1.5
+
+awareness_max            = 100.0
+awareness_decay_per_sec  = 2.0
+threshold_suspicious     = 20.0
+threshold_alert          = 60.0
+hysteresis_suspicious    = 5.0
+
+investigate_timeout_sec  = 5.0
