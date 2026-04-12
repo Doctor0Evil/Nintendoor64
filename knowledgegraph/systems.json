@@ -1,0 +1,27 @@
+{
+  "id": "systems.nintendoor64.starzip",
+  "kind": "System",
+  "tags": [
+    "Nintendoor64",
+    "N64",
+    "ROM",
+    "PackUnpack",
+    "BootHook",
+    "CLI",
+    "Rust"
+  ],
+  "paths": [
+    "crates/starzip-cli/src/lib.rs",
+    "crates/starzip-cli/src/main.rs",
+    "crates/n64-layout/src/lib.rs",
+    "configs/nintendoor64_test.layout.json"
+  ],
+  "repo": "Doctor0Evil/Nintendoor64",
+  "description": "Starzip: Nintendoor64 ROM pack/unpack and boot hook tool. Provides CLI for unpacking logical files, replacing assets, and injecting test patterns or controller hooks into the boot segment for N64-style builds.",
+  "depends_on": [],
+  "provides": [
+    "Nintendoor64.ROM.Pack",
+    "Nintendoor64.ROM.Unpack",
+    "Nintendoor64.ROM.BootHook"
+  ]
+}
