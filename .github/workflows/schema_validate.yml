@@ -4,14 +4,20 @@ on:
   push:
     paths:
       - 'schemas/**'
+      - 'docs/schema/**'
+      - 'data/bondfpscore/**'
       - 'knowledgegraph/**'
+      - 'examples/artifactspec/**'
   pull_request:
     paths:
       - 'schemas/**'
+      - 'docs/schema/**'
+      - 'data/bondfpscore/**'
       - 'knowledgegraph/**'
+      - 'examples/artifactspec/**'
 
 jobs:
-  validate-schemas:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +30,6 @@ jobs:
 
       - name: Validate ArtifactSpec examples
         run: |
-          # If you keep example ArtifactSpecs, validate them here.
           if compgen -G "examples/artifactspec/*.json" > /dev/null; then
             for f in examples/artifactspec/*.json; do
               echo "Validating $f"
@@ -32,26 +37,55 @@ jobs:
             done
           fi
 
+      - name: Validate stealth configs
+        run: |
+          if compgen -G "data/bondfpscore/stealth/*.json" > /dev/null; then
+            for f in data/bondfpscore/stealth/*.json; do
+              echo "Validating $f"
+              jsonschema -i "$f" docs/schema/bond_stealth.schema.json
+            done
+          fi
+
+      - name: Validate lock-on configs
+        run: |
+          if compgen -G "data/bondfpscore/lockon/*.json" > /dev/null; then
+            for f in data/bondfpscore/lockon/*.json; do
+              echo "Validating $f"
+              jsonschema -i "$f" docs/schema/bond_lockon.schema.json
+            done
+          fi
+
+      - name: Validate mission DAGs
+        run: |
+          if compgen -G "data/bondfpscore/missions/*.json" > /dev/null; then
+            for f in data/bondfpscore/missions/*.json; do
+              echo "Validating $f"
+              jsonschema -i "$f" docs/schema/bond_objectives.schema.json
+            done
+          fi
+
       - name: Validate system nodes
         run: |
-          # Validate each SystemNode in knowledgegraph/systems.json
-          # assuming systems.json is an array of nodes
           python - << 'PY'
-          import json, sys, subprocess, pathlib
+          import json, sys, subprocess, pathlib, tempfile
 
           schema = "schemas/system_node.schema.json"
           systems_file = "knowledgegraph/systems.json"
 
-          data = json.loads(pathlib.Path(systems_file).read_text())
-          if not isinstance(data, list):
-            print("systems.json must be a JSON array of nodes", file=sys.stderr)
-            sys.exit(1)
+          path = pathlib.Path(systems_file)
+          if not path.exists():
+              print(f"{systems_file} not found, skipping.", file=sys.stderr)
+              sys.exit(0)
 
-          import tempfile
+          data = json.loads(path.read_text())
+          if not isinstance(data, list):
+              print("systems.json must be a JSON array of nodes", file=sys.stderr)
+              sys.exit(1)
+
           for idx, node in enumerate(data):
-            with tempfile.NamedTemporaryFile("w", delete=False, suffix=".json") as tmp:
-              json.dump(node, tmp)
-              tmp.flush()
-              print(f"Validating SystemNode[{idx}] id={node.get('id')}")
-              subprocess.check_call(["jsonschema", "-i", tmp.name, schema])
+              with tempfile.NamedTemporaryFile("w", delete=False, suffix=".json") as tmp:
+                  json.dump(node, tmp)
+                  tmp.flush()
+                  print(f"Validating SystemNode[{idx}] id={node.get('id')}")
+                  subprocess.check_call(["jsonschema", "-i", tmp.name, schema])
           PY
