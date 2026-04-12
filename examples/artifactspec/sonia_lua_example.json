@@ -1,0 +1,6 @@
+{
+  "kind": "LuaScript",
+  "filename": "conk64/jump_boost.lua",
+  "encoding": "Text",
+  "content": "-- Auto-generated test script\nfunction on_frame_advance()\nend\n"
+}
