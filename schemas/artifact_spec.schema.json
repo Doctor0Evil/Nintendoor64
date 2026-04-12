@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://doctor0evil.github.io/Nintendoor64/schemas/artifact_spec.schema.json",
+  "title": "ArtifactSpec",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "filename", "content"],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "description": "Type of artifact to be written into artifacts/.",
+      "enum": [
+        "N64RomPatch",
+        "Ps1IsoPatch",
+        "LuaScript",
+        "InputMapperConfig",
+        "Other"
+      ]
+    },
+    "filename": {
+      "type": "string",
+      "description": "Path under artifacts/ where the artifact will be written.",
+      "minLength": 1,
+      "pattern": "^[^\\0]+$"
+    },
+    "encoding": {
+      "type": "string",
+      "description": "Encoding of the content field.",
+      "enum": ["Text", "Hex", "Base64"],
+      "default": "Text"
+    },
+    "content": {
+      "type": "string",
+      "description": "Artifact payload as UTF-8 text, hex string, or base64 depending on encoding.",
+      "minLength": 1
+    }
+  }
+}
