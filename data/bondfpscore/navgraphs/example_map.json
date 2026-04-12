@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "rooms": [
+    { "id": 0, "name": "Corridor A" },
+    { "id": 1, "name": "Guard Room" }
+  ],
+  "portals": [
+    { "room_a": 0, "room_b": 1 }
+  ]
+}
