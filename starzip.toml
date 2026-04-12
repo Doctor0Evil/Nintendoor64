@@ -1,0 +1,17 @@
+[project]
+name = "Bond64_Infiltration"
+target = "N64"
+entry_point = 0x80000400
+
+[input_mapping]
+enabled = true
+bitmask_address = 0x80010000 # Sonia writes keyboard state here
+poll_rate = "60Hz"
+
+[artifacts]
+lua_directory = "./artifacts/scripts"
+texture_directory = "./artifacts/vram"
+
+[compiler]
+optimization = "speed"
+hot_reload = true # Triggers when Sonia pushes a new Lua script
