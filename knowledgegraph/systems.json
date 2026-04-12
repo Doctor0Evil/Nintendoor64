@@ -27,6 +27,62 @@
     ]
   },
   {
+    "id": "systems.bondfpscore.stealth_ai",
+    "kind": "System",
+    "tags": [
+      "BondFPSCore",
+      "Stealth",
+      "Deterministic",
+      "LuaFacing",
+      "ConfigSchema"
+    ],
+    "paths": [
+      "crates/bondfpscore/src/stealth_ai.rs",
+      "crates/bondfpscore/src/stealth_ai_tests.rs",
+      "config/bondfpscore_stealth.toml",
+      "schemas/bondfpscore_stealth.schema.json"
+    ],
+    "repo": "Doctor0Evil/GAMEMODE.ai",
+    "description": "Bond/PD-style stealth AI: deterministic perception and awareness model (vision, sound, thresholds) for GoldenEye/Perfect Dark-style missions, with mission event hooks.",
+    "depends_on": [
+      "systems.bondfpscore.movement",
+      "systems.bondfpscore.weapons",
+      "systems.mission.objective_dag"
+    ],
+    "provides": [
+      "BondFPSCore.Stealth.Visibility",
+      "BondFPSCore.Stealth.Hearing",
+      "BondFPSCore.Stealth.Awareness",
+      "BondFPSCore.Stealth.MissionEvents"
+    ]
+  },
+  {
+    "id": "gm.retro.backend.nes.chrpacker",
+    "kind": "System",
+    "tags": [
+      "Retro",
+      "NES",
+      "Deterministic",
+      "AssetPack"
+    ],
+    "paths": [
+      "crates/retro-nes-core/src/constraints.rs",
+      "crates/retro-nes-core/src/packer.rs",
+      "crates/retro-nes-core/src/lib.rs"
+    ],
+    "repo": "Doctor0Evil/GAMEMODE.ai",
+    "description": "NES CHR + nametable packer for NROM-128: packs used tiles into an 8 KiB CHR bank and builds a 1 KiB nametable under NES VRAM and palette constraints.",
+    "depends_on": [
+      "systems.retro.recipes.core",
+      "systems.retro.constraints.nes",
+      "systems.retro.cli.build"
+    ],
+    "provides": [
+      "Retro.NES.AssetPack.CHR",
+      "Retro.NES.AssetPack.Nametable"
+    ]
+  },
+  {
     "id": "systems.nintendoor64.sonia",
     "kind": "System",
     "tags": [
