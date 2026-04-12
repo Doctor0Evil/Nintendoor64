@@ -16,10 +16,27 @@ pub enum ArtifactType {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub enum ArtifactEncoding {
+    Text,
+    Hex,
+    Base64,
+}
+
+impl Default for ArtifactEncoding {
+    fn default() -> Self {
+        ArtifactEncoding::Text
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ArtifactSpec {
     pub kind: ArtifactType,
     pub filename: String,
-    /// Content as UTF-8 text or ASCII-safe data (hex, base64, etc.).
+    /// How `content` is encoded. Defaults to Text.
+    #[serde(default)]
+    pub encoding: ArtifactEncoding,
+    /// Content as text, hex string, or base64 depending on `encoding`.
     pub content: String,
 }
 
@@ -51,14 +68,46 @@ impl SoniaUploader {
             fs::create_dir_all(parent)?;
         }
 
-        // For now, treat content as raw text bytes.
-        fs::write(&target_path, spec.content.as_bytes())?;
+        let bytes = decode_content(&spec)?;
+
+        fs::write(&target_path, &bytes)?;
 
         Ok(SoniaResult {
             ok: true,
             message: format!("Sonia committed artifact '{}'", spec.filename),
             path: Some(relative_path(&target_path, &self.repo_root)),
         })
+    }
+}
+
+fn decode_content(spec: &ArtifactSpec) -> Result<Vec<u8>> {
+    use anyhow::anyhow;
+    use ArtifactEncoding::*;
+
+    match spec.encoding {
+        Text => Ok(spec.content.clone().into_bytes()),
+        Hex => {
+            let s = spec.content.trim();
+            let s = s.strip_prefix("0x").unwrap_or(s);
+            if s.len() % 2 != 0 {
+                return Err(anyhow!("Hex content length must be even"));
+            }
+            let mut out = Vec::with_capacity(s.len() / 2);
+            for chunk in s.as_bytes().chunks(2) {
+                let hi = (chunk[0] as char)
+                    .to_digit(16)
+                    .ok_or_else(|| anyhow!("Invalid hex digit"))?;
+                let lo = (chunk[1] as char)
+                    .to_digit(16)
+                    .ok_or_else(|| anyhow!("Invalid hex digit"))?;
+                out.push(((hi << 4) | lo) as u8);
+            }
+            Ok(out)
+        }
+        Base64 => {
+            let decoded = base64::decode(&spec.content)?;
+            Ok(decoded)
+        }
     }
 }
 
