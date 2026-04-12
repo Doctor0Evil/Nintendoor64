@@ -1,0 +1,13 @@
+language = "C"
+include_guard = "GAMEMODEAI_H"
+pragma_once = true
+usize_is_size_t = true
+documentation = true
+
+[export]
+prefix = "gm"
+include = ["GMCoreConfig", "GMInputFrame", "GMSnapshotId", "GMArenaConfig",
+           "GMWorldHandle"]
+
+[fn]
+prefix = "gm"
