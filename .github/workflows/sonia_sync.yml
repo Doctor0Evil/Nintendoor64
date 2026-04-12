@@ -32,3 +32,21 @@ jobs:
           echo "Sync complete. Starting N64/PS1 repacking process..."
           # Placeholder for Starzip CLI command
           # ./starzip --pack artifacts/ --output build/game.z64
+
+      - name: Process Conk64 Lua Scripts
+        run: |
+          mkdir -p build/scripts
+          for f in artifacts/*.lua; do
+            echo "Validating $f for N64 runtime..."
+            # Simple syntax check using Lua CLI
+            luac -p "$f" 
+            cp "$f" build/scripts/
+          done
+
+      - name: Bundle for Emulator
+        uses: actions/upload-artifact@v4
+        with:
+          name: conk64-dev-build
+          path: |
+            build/scripts/
+            artifacts/*.z64
