@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "System Contract",
+  "type": "object",
+  "required": ["id", "deterministic", "uses_rng", "input_components", "output_components"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deterministic": {
+      "type": "boolean"
+    },
+    "uses_rng": {
+      "type": "boolean"
+    },
+    "allowed_side_effects": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "input_components": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "output_components": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
