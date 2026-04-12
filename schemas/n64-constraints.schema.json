@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://doctor0evil.github.io/Nintendoor64/schemas/n64-constraints.schema.json",
+  "title": "N64Constraints",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cartProfile",
+    "romSizeBytes",
+    "ramProfile",
+    "rdramBytes",
+    "engineReservedBytes",
+    "targetFps",
+    "cpuCyclesPerFrame",
+    "texturePoolBytes",
+    "audioPoolBytes",
+    "scriptPoolBytes",
+    "dataPoolBytes"
+  ],
+  "properties": {
+    "cartProfile": {
+      "type": "string",
+      "description": "Cartridge size profile.",
+      "enum": [
+        "size16MiB",
+        "size32MiB",
+        "size64MiB",
+        "custom"
+      ]
+    },
+    "romSizeBytes": {
+      "type": "integer",
+      "description": "Total ROM size in bytes for this build profile.",
+      "minimum": 1
+    },
+    "ramProfile": {
+      "type": "string",
+      "description": "RDRAM profile (base vs expansion vs custom).",
+      "enum": [
+        "base4MiB",
+        "expanded8MiB",
+        "custom"
+      ]
+    },
+    "rdramBytes": {
+      "type": "integer",
+      "description": "Total RDRAM in bytes available on target hardware.",
+      "minimum": 1
+    },
+    "engineReservedBytes": {
+      "type": "integer",
+      "description": "Bytes of RDRAM reserved by engine/runtime and not usable for streamed content.",
+      "minimum": 0
+    },
+    "targetFps": {
+      "type": "integer",
+      "description": "Target frames per second (e.g., 30 or 60).",
+      "minimum": 1
+    },
+    "cpuCyclesPerFrame": {
+      "type": "integer",
+      "description": "Estimated CPU cycles per frame budget at target FPS.",
+      "minimum": 1
+    },
+    "texturePoolBytes": {
+      "type": "integer",
+      "description": "Total ROM budget in bytes allocated to texture data.",
+      "minimum": 0
+    },
+    "audioPoolBytes": {
+      "type": "integer",
+      "description": "Total ROM budget in bytes allocated to audio banks and streams.",
+      "minimum": 0
+    },
+    "scriptPoolBytes": {
+      "type": "integer",
+      "description": "Total ROM budget in bytes allocated to scripts and logic data.",
+      "minimum": 0
+    },
+    "dataPoolBytes": {
+      "type": "integer",
+      "description": "Total ROM budget in bytes allocated to other structured data (cameras, tables, mission data).",
+      "minimum": 0
+    },
+    "segmentRomBudgets": {
+      "type": "object",
+      "description": "Optional per-segment ROM budgets in bytes (segment name -> max bytes).",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "default": {}
+    }
+  }
+}
