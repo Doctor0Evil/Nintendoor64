@@ -1,0 +1,57 @@
+name: Schema Validation
+
+on:
+  push:
+    paths:
+      - 'schemas/**'
+      - 'knowledgegraph/**'
+  pull_request:
+    paths:
+      - 'schemas/**'
+      - 'knowledgegraph/**'
+
+jobs:
+  validate-schemas:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install jsonschema CLI
+        run: |
+          pip install jsonschema
+
+      - name: Validate ArtifactSpec examples
+        run: |
+          # If you keep example ArtifactSpecs, validate them here.
+          if compgen -G "examples/artifactspec/*.json" > /dev/null; then
+            for f in examples/artifactspec/*.json; do
+              echo "Validating $f"
+              jsonschema -i "$f" schemas/artifact_spec.schema.json
+            done
+          fi
+
+      - name: Validate system nodes
+        run: |
+          # Validate each SystemNode in knowledgegraph/systems.json
+          # assuming systems.json is an array of nodes
+          python - << 'PY'
+          import json, sys, subprocess, pathlib
+
+          schema = "schemas/system_node.schema.json"
+          systems_file = "knowledgegraph/systems.json"
+
+          data = json.loads(pathlib.Path(systems_file).read_text())
+          if not isinstance(data, list):
+            print("systems.json must be a JSON array of nodes", file=sys.stderr)
+            sys.exit(1)
+
+          import tempfile
+          for idx, node in enumerate(data):
+            with tempfile.NamedTemporaryFile("w", delete=False, suffix=".json") as tmp:
+              json.dump(node, tmp)
+              tmp.flush()
+              print(f"Validating SystemNode[{idx}] id={node.get('id')}")
+              subprocess.check_call(["jsonschema", "-i", tmp.name, schema])
+          PY
