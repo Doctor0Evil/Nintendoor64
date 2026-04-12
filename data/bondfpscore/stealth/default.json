@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "profile_id": "bond.stealth.default",
+  "description": "Default GoldenEye/PD-style stealth for Bond-like FPS.",
+  "global": {
+    "base_visibility": 0.6,
+    "d_max": 25.0,
+    "k_decay": 0.15,
+    "t_suspicious": 0.35,
+    "t_alert": 0.7,
+    "light_exponent": 1.5,
+    "move_exponent": 1.0
+  },
+  "posture_factors": {
+    "standing": 1.0,
+    "crouch": 0.6,
+    "prone": 0.3
+  },
+  "movement_factors": {
+    "still": 0.5,
+    "walk": 1.0,
+    "run": 1.5
+  },
+  "sound": {
+    "enabled": false
+  }
+}
