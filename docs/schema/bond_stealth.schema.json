@@ -1,8 +1,15 @@
 {
+  "$id": "https://gamemode.ai/schemas/bond_stealth.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "BondFPSCore Stealth Parameters",
+  "title": "Bond/PD-style StealthConfig",
   "type": "object",
-  "required": ["schema_version", "profile_id", "global", "posture_factors", "movement_factors"],
+  "required": [
+    "schema_version",
+    "profile_id",
+    "global",
+    "posture_factors",
+    "movement_factors"
+  ],
   "additionalProperties": false,
   "properties": {
     "schema_version": {
@@ -29,13 +36,41 @@
       ],
       "additionalProperties": false,
       "properties": {
-        "base_visibility": { "type": "number", "minimum": 0.0, "maximum": 10.0 },
-        "d_max":          { "type": "number", "exclusiveMinimum": 0.0, "maximum": 100.0 },
-        "k_decay":        { "type": "number", "minimum": 0.0, "maximum": 1.0 },
-        "t_suspicious":   { "type": "number", "minimum": 0.0, "maximum": 1.0 },
-        "t_alert":        { "type": "number", "minimum": 0.0, "maximum": 1.0 },
-        "light_exponent": { "type": "number", "minimum": 1.0, "maximum": 5.0 },
-        "move_exponent":  { "type": "number", "minimum": 0.0, "maximum": 5.0 }
+        "base_visibility": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 10.0
+        },
+        "d_max": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "maximum": 100.0
+        },
+        "k_decay": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "t_suspicious": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "t_alert": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "light_exponent": {
+          "type": "number",
+          "minimum": 1.0,
+          "maximum": 5.0
+        },
+        "move_exponent": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 5.0
+        }
       }
     },
     "posture_factors": {
@@ -43,9 +78,21 @@
       "required": ["standing", "crouch", "prone"],
       "additionalProperties": false,
       "properties": {
-        "standing": { "type": "number", "minimum": 0.0, "maximum": 2.0 },
-        "crouch":   { "type": "number", "minimum": 0.0, "maximum": 2.0 },
-        "prone":    { "type": "number", "minimum": 0.0, "maximum": 2.0 }
+        "standing": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 2.0
+        },
+        "crouch": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 2.0
+        },
+        "prone": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 2.0
+        }
       }
     },
     "movement_factors": {
@@ -53,14 +100,60 @@
       "required": ["still", "walk", "run"],
       "additionalProperties": false,
       "properties": {
-        "still": { "type": "number", "minimum": 0.0, "maximum": 2.0 },
-        "walk":  { "type": "number", "minimum": 0.0, "maximum": 2.0 },
-        "run":   { "type": "number", "minimum": 0.0, "maximum": 2.0 }
+        "still": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 2.0
+        },
+        "walk": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 2.0
+        },
+        "run": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 3.0
+        }
       }
     },
     "sound": {
       "type": "object",
-      "additionalProperties": true
+      "required": ["enabled", "max_distance"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "max_distance": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "weapon_loudness": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 2.0
+          }
+        },
+        "footstep_loudness": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "walk": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 2.0
+            },
+            "run": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 2.0
+            }
+          }
+        }
+      }
     }
   }
 }
