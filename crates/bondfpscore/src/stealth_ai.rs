@@ -6,7 +6,7 @@
 
 use std::f32::consts::PI;
 
-/// Basic vector2/3 helpers – you can swap to glam or nalgebra later.
+/// Basic vector3 helpers – you can swap to glam or nalgebra later.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vec3 {
     pub x: f32,
@@ -15,22 +15,27 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
+    #[inline]
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
     }
 
+    #[inline]
     pub fn sub(self, rhs: Vec3) -> Vec3 {
         Vec3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 
+    #[inline]
     pub fn dot(self, rhs: Vec3) -> f32 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
 
+    #[inline]
     pub fn length(self) -> f32 {
         self.dot(self).sqrt()
     }
 
+    #[inline]
     pub fn normalize(self) -> Vec3 {
         let len = self.length();
         if len <= 1e-6 {
@@ -57,6 +62,32 @@ pub enum MovementState {
     Running,
 }
 
+/// Discrete guard awareness state, driven by the continuous awareness meter.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AwarenessState {
+    Idle,
+    Suspicious,
+    Alert,
+}
+
+/// Per-guard stealth state – store this as a component.
+#[derive(Debug, Clone, Copy)]
+pub struct GuardStealthState {
+    /// Normalized [0, 1] awareness meter.
+    pub awareness: f32,
+    pub state: AwarenessState,
+}
+
+impl GuardStealthState {
+    #[inline]
+    pub fn new() -> Self {
+        Self {
+            awareness: 0.0,
+            state: AwarenessState::Idle,
+        }
+    }
+}
+
 /// Tunable stealth parameters. These should be loaded from data (JSON/Lua)
 /// and cached in a resource in your ECS world.
 #[derive(Debug, Clone)]
@@ -79,7 +110,7 @@ pub struct StealthParams {
     pub move_running: f32,
     /// Awareness decay per second.
     pub awareness_decay: f32,
-    /// Thresholds for state transitions.
+    /// Thresholds for state transitions (0 <= suspicious < alert <= 1).
     pub threshold_suspicious: f32,
     pub threshold_alert: f32,
 }
@@ -100,31 +131,6 @@ impl Default for StealthParams {
             awareness_decay: 0.4,
             threshold_suspicious: 0.4,
             threshold_alert: 0.8,
-        }
-    }
-}
-
-/// Discrete guard awareness state, driven by the continuous awareness meter.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AwarenessState {
-    Idle,
-    Suspicious,
-    Alert,
-}
-
-/// Per-guard stealth state – store this as a component.
-#[derive(Debug, Clone, Copy)]
-pub struct GuardStealthState {
-    /// Normalized [0, 1] awareness meter.
-    pub awareness: f32,
-    pub state: AwarenessState,
-}
-
-impl GuardStealthState {
-    pub fn new() -> Self {
-        Self {
-            awareness: 0.0,
-            state: AwarenessState::Idle,
         }
     }
 }
@@ -154,14 +160,14 @@ fn distance_factor(d: f32, max_distance: f32, exponent: f32) -> f32 {
         0.0
     } else {
         let t = 1.0 - (d / max_distance).clamp(0.0, 1.0);
-        t.powf(exponent)
+        t.powf(exponent.max(1.0))
     }
 }
 
 /// Light factor f_L(L) in [0, 1]; higher light means more visible.
 fn light_factor(light_level: f32, exponent: f32) -> f32 {
     let l = light_level.clamp(0.0, 1.0);
-    l.powf(exponent)
+    l.powf(exponent.max(1.0))
 }
 
 /// Posture factor f_P(P).
@@ -182,7 +188,7 @@ fn movement_factor(movement: MovementState, params: &StealthParams) -> f32 {
     }
 }
 
-/// Compute instantaneous visibility score V in [0, +∞).
+/// Compute instantaneous visibility score V.
 ///
 /// If there is no line of sight, V is forced to 0. You can extend this later
 /// with sound-based detection by adding a separate hearing term.
@@ -209,7 +215,7 @@ pub fn compute_visibility(params: &StealthParams, inputs: &DetectionInputs) -> f
 
 /// Update awareness A over a timestep dt (seconds) and return new state.
 ///
-/// A_{t+dt} = clamp(A_t + V dt - k_decay dt, 0, 1)
+/// A_{t+dt} = clamp(A_t + V dt - k_decay dt, 0, 1),
 /// then thresholds are applied to determine the discrete AwarenessState.
 pub fn update_awareness(
     params: &StealthParams,
@@ -252,7 +258,7 @@ pub fn within_vision_cone(
     let dir = guard_to_player.normalize();
     let dot = f.dot(dir).clamp(-1.0, 1.0);
     let angle = dot.acos(); // radians
-    let cone_radians = cone_angle_degrees.to_radians();
+    let cone_radians = cone_angle_degrees * (PI / 180.0);
     angle <= cone_radians * 0.5
 }
 
