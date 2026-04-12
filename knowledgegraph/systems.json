@@ -34,25 +34,28 @@
       "Stealth",
       "Deterministic",
       "LuaFacing",
-      "ConfigSchema"
+      "ConfigSchema",
+      "Nintendoor64"
     ],
     "paths": [
       "crates/bondfpscore/src/stealth_ai.rs",
-      "crates/bondfpscore/src/stealth_ai_tests.rs",
-      "config/bondfpscore_stealth.toml",
-      "schemas/bondfpscore_stealth.schema.json"
+      "crates/bondfpscore/src/stealth_config.rs",
+      "data/bondfpscore/stealth/default.json",
+      "docs/schema/bond_stealth.schema.json"
     ],
-    "repo": "Doctor0Evil/GAMEMODE.ai",
-    "description": "Bond/PD-style stealth AI: deterministic perception and awareness model (vision, sound, thresholds) for GoldenEye/Perfect Dark-style missions, with mission event hooks.",
+    "repo": "Doctor0Evil/Nintendoor64",
+    "description": "Bond/PD-style stealth AI: deterministic perception and awareness model (vision, sound, thresholds) for GoldenEye/Perfect Dark-style missions, with StealthParams tuning schema and mission event hooks.",
     "depends_on": [
       "systems.bondfpscore.movement",
       "systems.bondfpscore.weapons",
       "systems.mission.objective_dag"
     ],
     "provides": [
+      "Nintendoor64.Artifacts.Schema.StealthParams",
       "BondFPSCore.Stealth.Visibility",
       "BondFPSCore.Stealth.Hearing",
       "BondFPSCore.Stealth.Awareness",
+      "BondFPSCore.Stealth.Configurable",
       "BondFPSCore.Stealth.MissionEvents"
     ]
   },
