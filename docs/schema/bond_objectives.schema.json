@@ -1,4 +1,5 @@
 {
+  "$id": "https://gamemode.ai/schemas/bond_objectives.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Bond Mission Objectives DAG",
   "type": "object",
@@ -7,7 +8,8 @@
   "properties": {
     "schema_version": {
       "type": "integer",
-      "const": 1
+      "minimum": 1,
+      "maximum": 1
     },
     "mission_id": {
       "type": "string",
