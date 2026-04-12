@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::io::{self, Read};
@@ -81,7 +81,6 @@ impl SoniaUploader {
 }
 
 fn decode_content(spec: &ArtifactSpec) -> Result<Vec<u8>> {
-    use anyhow::anyhow;
     use ArtifactEncoding::*;
 
     match spec.encoding {
@@ -92,6 +91,7 @@ fn decode_content(spec: &ArtifactSpec) -> Result<Vec<u8>> {
             if s.len() % 2 != 0 {
                 return Err(anyhow!("Hex content length must be even"));
             }
+
             let mut out = Vec::with_capacity(s.len() / 2);
             for chunk in s.as_bytes().chunks(2) {
                 let hi = (chunk[0] as char)
