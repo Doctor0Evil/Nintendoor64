@@ -1,0 +1,14 @@
+{
+  "id": "systems.bondfpscore.stealth_ai",
+  "deterministic": true,
+  "uses_rng": false,
+  "allowed_side_effects": [],
+  "input_components": [
+    "Transform",
+    "RoomTransform",
+    "PlayerStealthSignature"
+  ],
+  "output_components": [
+    "GuardStealthState"
+  ]
+}
