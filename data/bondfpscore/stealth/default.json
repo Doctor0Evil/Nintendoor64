@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile_id": "bond.stealth.default",
-  "description": "Default GoldenEye/PD-style stealth for Bond-like FPS.",
+  "description": "Default Bond/PD-style stealth profile.",
   "global": {
     "base_visibility": 0.6,
     "d_max": 25.0,
@@ -22,6 +22,17 @@
     "run": 1.5
   },
   "sound": {
-    "enabled": false
+    "enabled": false,
+    "max_distance": 30.0,
+    "weapon_loudness": {
+      "pistol": 0.6,
+      "pistol_silenced": 0.2,
+      "smg": 0.8,
+      "rifle": 1.0
+    },
+    "footstep_loudness": {
+      "walk": 0.3,
+      "run": 0.6
+    }
   }
 }
