@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bond Guard State Machine Parameters",
+  "type": "object",
+  "required": ["schema_version", "profile_id", "thresholds"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "thresholds": {
+      "type": "object",
+      "required": ["t_suspicious", "t_alert", "decay"],
+      "additionalProperties": false,
+      "properties": {
+        "t_suspicious": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "t_alert":      { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "decay":        { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+      }
+    }
+  }
+}
