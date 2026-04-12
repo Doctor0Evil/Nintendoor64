@@ -39,15 +39,17 @@
     ],
     "paths": [
       "crates/sonia-core/src/lib.rs",
-      "crates/sonia-core/src/main.rs"
+      "crates/sonia-core/src/main.rs",
+      "schemas/artifact_spec.schema.json"
     ],
     "repo": "Doctor0Evil/Nintendoor64",
-    "description": "Sonia core artifact sink: reads JSON ArtifactSpec from stdin, decodes text/hex/base64 content, writes artifacts/*, and reports status for AI-Chat orchestration and CI.",
+    "description": "Sonia core artifact sink and schema owner. Reads JSON ArtifactSpec from stdin, decodes Text/Hex/Base64 content, writes artifacts/*, and reports structured results for AI-Chat and CI.",
     "depends_on": [],
     "provides": [
       "Nintendoor64.Artifacts.Write",
       "Nintendoor64.Artifacts.Decode",
-      "Nintendoor64.Artifacts.Report"
+      "Nintendoor64.Artifacts.Report",
+      "Nintendoor64.Artifacts.Schema.ArtifactSpec"
     ]
   }
 ]
