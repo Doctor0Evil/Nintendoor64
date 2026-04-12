@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://doctor0evil.github.io/Nintendoor64/schemas/n64-asset-manifest.schema.json",
+  "title": "N64AssetManifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "assets"
+  ],
+  "properties": {
+    "buildId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Optional identifier for this build or recipe (e.g., systems.nintendoor64.bond64.demo01).",
+      "minLength": 1
+    },
+    "assets": {
+      "type": "array",
+      "description": "List of assets participating in ROM/RAM/CPU budgeting.",
+      "items": {
+        "$ref": "#/$defs/N64AssetEntry"
+      },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "N64AssetClass": {
+      "type": "string",
+      "description": "High-level asset class for budgeting.",
+      "enum": [
+        "code",
+        "texture",
+        "audio",
+        "script",
+        "missionData",
+        "other"
+      ]
+    },
+    "N64AssetEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "segment",
+        "class",
+        "sizeBytes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Logical identifier or path for this asset (e.g., textures/ui/title-screen.rgba16).",
+          "minLength": 1
+        },
+        "segment": {
+          "type": "string",
+          "description": "ROM segment name this asset resides in (must match RomLayout segment names).",
+          "minLength": 1
+        },
+        "class": {
+          "$ref": "#/$defs/N64AssetClass"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "description": "Byte size of this asset in the ROM image.",
+          "minimum": 0
+        },
+        "runtimeBytes": {
+          "type": "integer",
+          "description": "Approximate runtime footprint in RAM bytes when this asset is resident.",
+          "minimum": 0,
+          "default": 0
+        },
+        "cpuCyclesPerFrame": {
+          "type": "integer",
+          "description": "Approximate CPU cost per frame in cycles attributed to this asset (e.g., AI or effects scripts).",
+          "minimum": 0,
+          "default": 0
+        }
+      }
+    }
+  }
+}
