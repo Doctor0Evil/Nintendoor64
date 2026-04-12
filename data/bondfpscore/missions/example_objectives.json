@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "mission_id": "bond.mission.example",
+  "objectives": [
+    {
+      "id": "install_modem",
+      "description": "Install the modem on the terminal.",
+      "condition": "flag('modem_installed') == true",
+      "failure": "",
+      "pre": []
+    },
+    {
+      "id": "escape",
+      "description": "Reach the exit.",
+      "condition": "inside_volume('exit_zone')",
+      "failure": "",
+      "pre": ["install_modem"]
+    }
+  ]
+}
