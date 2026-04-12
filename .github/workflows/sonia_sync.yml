@@ -1,0 +1,34 @@
+name: Sonia Artifact Sync
+
+on:
+  push:
+    paths:
+      - 'artifacts/**' # Triggers when new files appear in the artifacts folder
+  workflow_dispatch: # Allows manual trigger from the Sonia crate
+
+jobs:
+  sync-and-repack:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to push changes back to the repo
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Auto-Commit AI Artifacts
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Sonia: Auto-syncing AI-generated retro assets"
+          file_pattern: 'artifacts/*'
+
+      - name: Trigger Starzip Build
+        run: |
+          echo "Sync complete. Starting N64/PS1 repacking process..."
+          # Placeholder for Starzip CLI command
+          # ./starzip --pack artifacts/ --output build/game.z64
