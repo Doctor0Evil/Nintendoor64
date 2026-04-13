@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "N64 BudgetReport",
+  "type": "object",
+  "required": [
+    "romUsedBytes",
+    "romBudgetBytes",
+    "romOverBudgetBytes",
+    "classUsage",
+    "segmentUsage"
+  ],
+  "properties": {
+    "romUsedBytes": { "type": "integer", "minimum": 0 },
+    "romBudgetBytes": { "type": "integer", "minimum": 0 },
+    "romOverBudgetBytes": { "type": "integer" },
+    "classUsage": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["usedBytes", "budgetBytes", "overBudgetBytes"],
+        "additionalProperties": false,
+        "properties": {
+          "usedBytes": { "type": "integer", "minimum": 0 },
+          "budgetBytes": { "type": "integer", "minimum": 0 },
+          "overBudgetBytes": { "type": "integer" }
+        }
+      }
+    },
+    "segmentUsage": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["usedBytes", "budgetBytes", "overBudgetBytes"],
+        "additionalProperties": false,
+        "properties": {
+          "usedBytes": { "type": "integer", "minimum": 0 },
+          "budgetBytes": { "type": "integer", "minimum": 0 },
+          "overBudgetBytes": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
