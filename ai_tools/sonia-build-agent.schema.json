@@ -2,32 +2,51 @@
   "type": "function",
   "function": {
     "name": "sonia_build_agent_dispatch",
-    "description": "Terminal-less build orchestrator. Submits structured compilation or schema generation intents to the Sonia daemon. NEVER invoke raw shell commands.",
+    "description": "Submit a structured build or schema-generation intent to the Sonia build daemon. Never invoke raw shell commands.",
     "parameters": {
       "type": "object",
       "properties": {
         "method": {
           "type": "string",
           "enum": ["cargo_check", "cargo_build", "generate_schemas"],
-          "description": "Target operation. cargo_check for fast diagnostics, cargo_build for release, generate_schemas for contract updates."
+          "description": "cargo_check for fast diagnostics, cargo_build for full builds, generate_schemas for schema regeneration."
         },
         "params": {
           "type": "object",
           "properties": {
-            "crate_name": { "type": "string", "description": "Target Rust crate (e.g., 'sonia-core', 'n64-ai-gen-schemas')" },
-            "features": { "type": "array", "items": { "type": "string" }, "description": "Feature flags to enable" },
-            "output_dir": { "type": "string", "description": "Only for generate_schemas: where to write .schema.json files" }
+            "crate_name": {
+              "type": "string",
+              "description": "Target Rust crate name."
+            },
+            "features": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Feature flags to enable."
+            },
+            "profile": {
+              "type": "string",
+              "enum": ["dev", "release", "check"],
+              "description": "Build profile; defaults to 'check' if omitted."
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "For generate_schemas: directory for emitted schema files."
+            }
           },
           "required": ["crate_name"]
         },
         "priority": {
           "type": "string",
           "enum": ["background", "normal", "blocking"],
-          "description": "Execution priority. Use 'blocking' only for critical path validations."
+          "description": "Execution priority within the session."
         },
         "intent_id": {
           "type": "string",
-          "description": "UUID for correlating request/response in AI context."
+          "description": "Stable ID for correlating request and events."
+        },
+        "session_id": {
+          "type": "string",
+          "description": "Optional SessionProfile.id used for invariant checks."
         }
       },
       "required": ["method", "params", "priority", "intent_id"]
