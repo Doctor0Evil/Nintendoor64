@@ -1,0 +1,63 @@
+{
+  "entrypoint": 2147487808,
+  "romSize": 8388608,
+  "segments": [
+    {
+      "name": "BOOT",
+      "kind": "Code",
+      "romOffset": 0,
+      "romSize": 262144,
+      "vramStart": 2147483648,
+      "compression": "None",
+      "mutable": false
+    },
+    {
+      "name": "LEVEL1",
+      "kind": "Map",
+      "romOffset": 262144,
+      "romSize": 2097152,
+      "vramStart": 2147745792,
+      "compression": "None",
+      "mutable": true
+    },
+    {
+      "name": "ASSETS",
+      "kind": "Texture",
+      "romOffset": 2359296,
+      "romSize": 2097152,
+      "vramStart": 2150,
+      "compression": "Yaz0",
+      "mutable": true
+    }
+  ],
+  "files": [
+    {
+      "path": "boot/microkernel.bin",
+      "segment": "BOOT",
+      "offsetInSegment": 0,
+      "length": 131072,
+      "contentType": "mips.code"
+    },
+    {
+      "path": "maps/conker_mini/geo.bin",
+      "segment": "LEVEL1",
+      "offsetInSegment": 0,
+      "length": 524288,
+      "contentType": "map.geo"
+    },
+    {
+      "path": "maps/conker_mini/script.bin",
+      "segment": "LEVEL1",
+      "offsetInSegment": 524288,
+      "length": 131072,
+      "contentType": "script.bytecode"
+    },
+    {
+      "path": "textures/title/title-screen.rgba16",
+      "segment": "ASSETS",
+      "offsetInSegment": 0,
+      "length": 262144,
+      "contentType": "texture.rgba16"
+    }
+  ]
+}
