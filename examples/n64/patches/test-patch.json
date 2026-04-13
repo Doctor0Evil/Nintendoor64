@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "baseRomId": "n64:test-rom",
+  "layoutId": "n64:test-layout",
+  "edits": [
+    {
+      "kind": "ReplaceFile",
+      "logical_path": "textures/title-screen.rgba16",
+      "payload_ref": "artifacts/patches/n64/test-title-screen.bin",
+      "encoding": "Base64"
+    }
+  ]
+}
