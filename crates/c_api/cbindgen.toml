@@ -1,0 +1,42 @@
+# cbindgen configuration for GAMEMODE.ai C API
+
+language = "C"
+namespace = "gamemode_ai"
+
+include_guard = "GAMEMODE_AI_H"
+pragma_once = true
+
+# Where to look for Rust sources
+crate = "."
+parse_deps = false
+
+[export]
+# Only export symbols from this crate with these patterns
+include = ["GM_*", "gm_*"]
+exclude = []
+
+[fn]
+rename_args = "None"
+prefix = ""
+postfix = ""
+
+[struct]
+derive_eq = false
+derive_neq = false
+derive_ostream = false
+
+[enum]
+rename_variants = "None"
+prefix_with_name = false
+
+[macro]
+# No macro exports
+
+[defines]
+"GAMEMODE_AI_VERSION" = "\"0.1.0\""
+"GAMEMODE_AI_DETERMINISTIC" = "1"
+
+[parse.expand]
+# Crates to expand for better type resolution
+crates = ["core_ecs", "arena_shooter_core"]
+all_features = false
