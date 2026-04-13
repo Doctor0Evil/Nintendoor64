@@ -1,0 +1,53 @@
+{
+  "entrypoint": 2147487744,
+  "romSize": 8388608,
+  "segments": [
+    {
+      "name": "boot",
+      "kind": "Code",
+      "romoffset": 0,
+      "romsize": 65536,
+      "vramstart": 2147483648,
+      "compression": "None"
+    },
+    {
+      "name": "main",
+      "kind": "Code",
+      "romoffset": 65536,
+      "romsize": 2097152,
+      "vramstart": 2147549184,
+      "compression": "None"
+    },
+    {
+      "name": "assets",
+      "kind": "Texture",
+      "romoffset": 2162688,
+      "romsize": 4194304,
+      "vramstart": 2151677952,
+      "compression": "None"
+    }
+  ],
+  "files": [
+    {
+      "path": "textures/title-screen.rgba16",
+      "segment": "assets",
+      "offsetInSegment": 0,
+      "length": 262144,
+      "contentType": "texture.rgba16"
+    },
+    {
+      "path": "maps/test-level.geo.bin",
+      "segment": "assets",
+      "offsetInSegment": 262144,
+      "length": 524288,
+      "contentType": "map.geo"
+    },
+    {
+      "path": "scripts/test-level.lua",
+      "segment": "assets",
+      "offsetInSegment": 786432,
+      "length": 65536,
+      "contentType": "script.lua"
+    }
+  ]
+}
