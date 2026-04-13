@@ -1,4 +1,5 @@
 {
+  "$schema": "schemas/featurelayout.schema.json",
   "repo": "Doctor0Evil/Nintendoor64",
   "version": "1.0.0",
   "features": [
@@ -292,7 +293,7 @@
         "systems.retro.nes.packer.nrom_128"
       ],
       "schemas": [
-        "schemas/artifactspec.schema.json",
+        "schemas/artifact-spec.schema.json",
         "schemas/rompatch.schema.json",
         "schemas/systemnode.schema.json"
       ],
@@ -353,8 +354,8 @@
       ],
       "schemas": [
         "schemas/buildrecipe.schema.json",
-        "schemas/sessionprofile.schema.json",
-        "schemas/artifactspec.schema.json",
+        "schemas/session.schema.json",
+        "schemas/artifact-spec.schema.json",
         "schemas/systemnode.schema.json"
       ],
       "examples": [
@@ -527,7 +528,7 @@
       ],
       "schemas": [
         "schemas/systemnode.schema.json",
-        "schemas/artifactspec.schema.json",
+        "schemas/artifact-spec.schema.json",
         "schemas/gamerecipe.schema.json",
         "schemas/stealthparams.schema.json",
         "schemas/narrativegraph.schema.json"
