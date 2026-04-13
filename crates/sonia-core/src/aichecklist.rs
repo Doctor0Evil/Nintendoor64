@@ -1,3 +1,5 @@
+// Filename: cratessonia-core/src/aichecklist.rs
+
 use serde::{Deserialize, Serialize};
 
 use crate::invariants::{
@@ -5,6 +7,13 @@ use crate::invariants::{
     determinism,
     hardware_budget,
     patch_safety,
+};
+
+use crate::invariants::{
+    abi_guard::{AbiGuardChecker},
+    determinism::DeterminismChecker,
+    hardware_budget::HardwareBudgetChecker,
+    patch_safety::PatchSafetyChecker,
 };
 
 /// High-level classification of what is being checked.
@@ -131,26 +140,26 @@ pub trait Check {
 
 /// A small struct that owns the four core checks and can be extended later.
 pub struct Checklist {
-    patch_safety: patch_safety::PatchSafetyChecker,
-    hardware_budget: hardware_budget::HardwareBudgetChecker,
-    determinism: determinism::DeterminismChecker,
-    abi_guard: abi_guard::AbiGuardChecker,
+    patch_safety: PatchSafetyChecker,
+    hardware_budget: HardwareBudgetChecker,
+    determinism: DeterminismChecker,
+    abi_guard: AbiGuardChecker,
 }
 
 impl Checklist {
     pub fn new() -> Self {
         Self {
-            patch_safety: patch_safety::PatchSafetyChecker::new(),
-            hardware_budget: hardware_budget::HardwareBudgetChecker::new(),
-            determinism: determinism::DeterminismChecker::new(),
-            abi_guard: abi_guard::AbiGuardChecker::new(),
+            patch_safety: PatchSafetyChecker::new(),
+            hardware_budget: HardwareBudgetChecker::new(),
+            determinism: DeterminismChecker::new(),
+            abi_guard: AbiGuardChecker::new(),
         }
     }
 
     pub fn run_all(&self, input: &ChecklistInput) -> anyhow::Result<ChecklistReport> {
         let mut results = Vec::new();
 
-        // Patch safety is only meaningful when working with an N64 patch bundle.
+        // Patch safety is only meaningful when working with an N64 patch bundle or console build.
         if matches!(input.kind, ArtifactKind::N64Patch | ArtifactKind::ConsoleBuild) {
             if let Some(result) = self.run_patch_safety_if_applicable(input)? {
                 results.push(result);
@@ -176,9 +185,9 @@ impl Checklist {
             results.push(result);
         }
 
-        let overall_passed = results
-            .iter()
-            .all(|r| r.passed || matches!(r.severity, Severity::Info | Severity::Warning));
+        let overall_passed = results.iter().all(|r| {
+            r.passed || matches!(r.severity, Severity::Info | Severity::Warning)
+        });
 
         Ok(ChecklistReport {
             kind: input.kind.clone(),
@@ -230,7 +239,7 @@ pub fn run_checklist(input: ChecklistInput) -> anyhow::Result<ChecklistReport> {
 }
 
 /// CLI adapter that can be called from the Sonia JSON envelope handler.
-/// - Request: { "version": 1, "command": "runChecklist", "params": { ...ChecklistRequest... } }
+/// - Request:  { "version": 1, "command": "runChecklist", "params": { ...ChecklistRequest... } }
 /// - Response: { "version": 1, "status": "ok", "data": { "report": ... } }
 pub fn handle_run_checklist(params: serde_json::Value) -> anyhow::Result<serde_json::Value> {
     let req: ChecklistRequest = serde_json::from_value(params)?;
