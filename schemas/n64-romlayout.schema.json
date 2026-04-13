@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "N64 RomLayout",
+  "type": "object",
+  "required": ["entrypoint", "romSize", "segments", "files"],
+  "properties": {
+    "entrypoint": { "type": "integer", "minimum": 0 },
+    "romSize": { "type": "integer", "minimum": 0 },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "kind", "romOffset", "romSize", "vramStart", "compression"],
+        "properties": {
+          "name": { "type": "string" },
+          "kind": {
+            "oneOf": [
+              { "enum": ["Code", "Data", "Texture", "Audio", "Map", "Script"] },
+              {
+                "type": "object",
+                "required": ["Other"],
+                "properties": { "Other": { "type": "string" } },
+                "additionalProperties": false
+              }
+            ]
+          },
+          "romOffset": { "type": "integer", "minimum": 0 },
+          "romSize": { "type": "integer", "minimum": 0 },
+          "vramStart": { "type": "integer", "minimum": 0 },
+          "compression": {
+            "oneOf": [
+              { "enum": ["None", "Yaz0", "MIO0"] },
+              {
+                "type": "object",
+                "required": ["Custom"],
+                "properties": { "Custom": { "type": "string" } },
+                "additionalProperties": false
+              }
+            ]
+          },
+          "mutable": { "type": "boolean", "default": false }
+        },
+        "additionalProperties": false
+      }
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "segment", "offsetInSegment", "length", "contentType"],
+        "properties": {
+          "path": { "type": "string" },
+          "segment": { "type": "string" },
+          "offsetInSegment": { "type": "integer", "minimum": 0 },
+          "length": { "type": "integer", "minimum": 0 },
+          "contentType": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
