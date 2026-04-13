@@ -62,3 +62,23 @@ description = "Run cargo check/build in a deterministic, JSON-driven way."
 stdin_schema = "schemas/gamemodeai.rust.run-cargo-params.schema.json"
 stdout_schema = "schemas/gamemodeai.rust.run-cargo-result.schema.json"
 non_interactive = true
+
+[[methods]]
+id = "maintenance.preview"
+cli = "n64-build-maintenance"
+stdinSchema = "schemas/n64-build-maintenance.schema.json#/definitions/MaintenancePreviewRequest"
+stdoutSchema = "schemas/n64-build-maintenance.schema.json#/definitions/MaintenancePreviewResponse"
+nonInteractive = true
+modesPermitted = ["CiRunner"]
+costEstimate = 5
+destructive = false
+
+[[methods]]
+id = "maintenance.confirm"
+cli = "n64-build-maintenance"
+stdinSchema = "schemas/n64-build-maintenance.schema.json#/definitions/MaintenanceConfirmRequest"
+stdoutSchema = "schemas/n64-build-maintenance.schema.json#/definitions/MaintenanceConfirmResponse"
+nonInteractive = true
+modesPermitted = ["CiRunner"]
+costEstimate = 10
+destructive = true
