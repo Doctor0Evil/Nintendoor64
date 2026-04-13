@@ -1,4 +1,4 @@
-# Nintendoor64/crates/sonia-build-agent/Cargo.toml
+# crates/sonia-build-agent/Cargo.toml
 [package]
 name = "sonia-build-agent"
 version = "0.1.0"
@@ -8,32 +8,30 @@ license = "MIT"
 publish = false
 
 [dependencies]
-# Core serialization & schemas
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 schemars = "0.8"
 
-# Async runtime & channels
 tokio = { version = "1.36", features = ["full"] }
 tokio-stream = "0.1"
 async-channel = "2.1"
 
-# CLI & logging
 clap = { version = "4.4", features = ["derive"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-# Process execution
-tokio-process-tools = "5.5"
+# Tokio's Command is now in tokio::process; no extra crate is strictly required.
+# If you want helpers, keep this; otherwise you can drop it.
+tokio-process = "0.2"
+
 regex = "1.10"
 
-# Nintendoor64 session contracts
 gamemodeai-session = { path = "../gamemodeai-session" }
 
 [features]
 default = ["full"]
 full = []
-sandbox = [] # Placeholder for future Firecracker/gVisor integration
+sandbox = [] # future: Firecracker/gVisor integration
 
 [[bin]]
 name = "sonia-build-agent"
