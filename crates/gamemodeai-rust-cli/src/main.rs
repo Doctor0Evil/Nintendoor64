@@ -1,5 +1,4 @@
 use std::io::{self, Read};
-use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 use anyhow::{anyhow, Context, Result};
@@ -12,6 +11,7 @@ use serde::{Deserialize, Serialize};
 
 mod contracts;
 
+/// JSON-RPC-like request envelope.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "kind")]
 enum RequestEnvelope {
@@ -38,15 +38,13 @@ fn main() -> Result<()> {
         serde_json::from_str(&buf).context("parsing JSON request into RequestEnvelope")?;
 
     let resp = match req {
-        RequestEnvelope::RunCargo { id, params } => {
-            match handle_run_cargo(&params) {
-                Ok(result) => ResponseEnvelope::RunCargoResult { id, result },
-                Err(e) => ResponseEnvelope::Error {
-                    id: Some(id),
-                    message: format!("{e:#}"),
-                },
-            }
-        }
+        RequestEnvelope::RunCargo { id, params } => match handle_run_cargo(&params) {
+            Ok(result) => ResponseEnvelope::RunCargoResult { id, result },
+            Err(e) => ResponseEnvelope::Error {
+                id: Some(id),
+                message: format!("{e:#}"),
+            },
+        },
     };
 
     let out = serde_json::to_string_pretty(&resp)?;
@@ -151,32 +149,33 @@ fn handle_run_cargo(params: &RunCargoParams) -> Result<RunCargoResult> {
         }
 
         match serde_json::from_str::<CargoMessage>(line) {
-            Ok(msg) => {
-                match msg {
-                    CargoMessage::CompilerMessage(m) => {
-                        if let Some(diag) = convert_compiler_message(&m) {
-                            diagnostics.push(diag);
-                        }
-                    }
-                    CargoMessage::BuildScriptMessage(m) => {
-                        log_events.push(BuildLogEvent {
-                            kind: "BuildScript".to_string(),
-                            message: m.message.message,
-                            timestamp_utc: Some(Utc::now().to_rfc3339()),
-                        });
-                    }
-                    CargoMessage::TextLine(t) => {
-                        log_events.push(BuildLogEvent {
-                            kind: "Info".to_string(),
-                            message: t,
-                            timestamp_utc: Some(Utc::now().to_rfc3339()),
-                        });
-                    }
-                    _ => {
-                        // Ignored for now; you can add richer handling later.
+            Ok(msg) => match msg {
+                CargoMessage::CompilerMessage(m) => {
+                    if let Some(diag) = convert_compiler_message(&m) {
+                        diagnostics.push(diag);
                     }
                 }
-            }
+                CargoMessage::BuildScriptMessage(m) => {
+                    log_events.push(BuildLogEvent {
+                        kind: "BuildScript".to_string(),
+                        message: m.message.message,
+                        timestamp_utc: Some(Utc::now().to_rfc3339()),
+                    });
+                }
+                CargoMessage::TextMessage(t) => {
+                    log_events.push(BuildLogEvent {
+                        kind: "Info".to_string(),
+                        message: t.message,
+                        timestamp_utc: Some(Utc::now().to_rfc3339()),
+                    });
+                }
+                CargoMessage::BuildFinished(_) => {
+                    // Could add a summary event later.
+                }
+                CargoMessage::Other => {
+                    // Ignored for now; you can add richer handling later.
+                }
+            },
             Err(_) => {
                 // If the line is not valid JSON, treat it as a plain log line.
                 log_events.push(BuildLogEvent {
