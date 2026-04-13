@@ -4,9 +4,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::layout::{RomLayout, Segment, FileEntry};
 
-/// ArtifactType and ArtifactEncoding are defined in cratessonia-core.
-/// We re-declare minimal copies here behind a feature flag, or you can
-/// depend directly on sonia-core if your workspace allows it.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ArtifactType {
@@ -40,8 +37,6 @@ pub struct ArtifactSpec {
     pub content: String,
 }
 
-/// High-level patch spec mirrored from crates/starzip-core/src/patch.rs.
-/// This is the JSON that AI emits and Sonia validates/writes.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum PatchEdit {
@@ -78,7 +73,6 @@ pub struct PatchSpec {
     pub edits: Vec<PatchEdit>,
 }
 
-/// Bridge errors kept human-readable but machine-parseable.
 #[derive(Debug, thiserror::Error)]
 pub enum SoniaBridgeError {
     #[error("ROM layout has no segments")]
@@ -101,10 +95,9 @@ pub enum SoniaBridgeError {
     Other(String),
 }
 
-/// A minimal view of payloads that Sonia has already written under `artifacts/`.
+/// Minimal index of payload lengths Sonia has written under `artifacts/`.
 #[derive(Debug, Clone)]
 pub struct PayloadIndex {
-    /// Map from payload_ref (e.g. "patches/title.bin") to byte length.
     pub lengths: std::collections::HashMap<String, u64>,
 }
 
@@ -125,8 +118,29 @@ impl PayloadIndex {
     }
 }
 
-/// Bridge helpers for turning layout + high-level patch into safer objects
-/// that Sonia and Starzip can agree on.
+/// JSON-friendly per-segment usage report for CI and AI.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SegmentPatchUsage {
+    pub segment_name: String,
+    pub segment_kind: String,
+    pub rom_offset: u32,
+    pub rom_size: u32,
+    pub current_bytes: u64,
+    pub added_bytes: u64,
+    pub max_bytes: u64,
+}
+
+/// Summary covering all segments touched by a PatchSpec.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PatchImpactReport {
+    pub layout_id: String,
+    pub base_rom_id: String,
+    pub total_added_bytes: u64,
+    pub per_segment: Vec<SegmentPatchUsage>,
+}
+
 pub struct SoniaBridge<'a> {
     layout: &'a RomLayout,
 }
@@ -153,8 +167,6 @@ impl<'a> SoniaBridge<'a> {
         }
     }
 
-    /// Quick adapter to turn a small test ROM patch binary into an ArtifactSpec.
-    /// `filename` is something like "artifacts/patches/n64/test-intro-skip.bin".
     pub fn rom_patch_to_artifact(
         &self,
         filename: &str,
@@ -169,15 +181,20 @@ impl<'a> SoniaBridge<'a> {
         }
     }
 
-    /// Validate a PatchSpec against the layout and known payload sizes.
-    /// This does not touch ROM bytes; it only checks that:
-    /// - logical paths exist in the layout
-    /// - payloads referenced actually exist and fit into their targets
-    pub fn validate_patch_spec(
+    /// Validate a PatchSpec and return an impact report if successful.
+    /// This:
+    /// - checks that logical paths exist
+    /// - checks payload sizes fit file lengths
+    /// - aggregates per-segment added bytes and maximum capacity
+    pub fn validate_patch_spec_with_report(
         &self,
         spec: &PatchSpec,
         payload_index: &PayloadIndex,
-    ) -> Result<(), SoniaBridgeError> {
+    ) -> Result<PatchImpactReport, SoniaBridgeError> {
+        use std::collections::HashMap;
+
+        let mut per_segment_added: HashMap<String, u64> = HashMap::new();
+
         for edit in &spec.edits {
             match edit {
                 PatchEdit::ReplaceFile {
@@ -203,9 +220,12 @@ impl<'a> SoniaBridge<'a> {
                             max: file.length as u64,
                         });
                     }
+
+                    *per_segment_added.entry(file.segment.clone()).or_insert(0) += payload_len;
                 }
                 PatchEdit::BootHook { .. } => {
-                    // Layout-based checks for boot hooks can be added here later.
+                    // Boot hooks typically go into a dedicated segment;
+                    // you can wire that here once the layout marks it.
                 }
                 PatchEdit::JsonPatch { logical_path, .. } => {
                     let _ = self
@@ -216,18 +236,61 @@ impl<'a> SoniaBridge<'a> {
                         .ok_or_else(|| SoniaBridgeError::UnknownFile(logical_path.clone()))?;
                 }
                 PatchEdit::RawIntervalPatch { .. } => {
-                    // Raw intervals are checked in Starzip's Safe Patch Synthesizer.
+                    // Raw intervals are handled by Starzip. For now we do not
+                    // attribute added bytes here since size is constrained by max_bytes.
                 }
             }
         }
 
+        let mut per_segment_reports = Vec::new();
+        let mut total_added_bytes = 0;
+
+        for segment in &self.layout.segments {
+            let added = per_segment_added
+                .get(&segment.name)
+                .copied()
+                .unwrap_or(0);
+
+            if added == 0 {
+                continue;
+            }
+
+            let current_bytes = segment.romsize as u64;
+            let max_bytes = segment.romsize as u64; // can be extended later with budget profiles
+
+            total_added_bytes += added;
+
+            per_segment_reports.push(SegmentPatchUsage {
+                segment_name: segment.name.clone(),
+                segment_kind: format!("{:?}", segment.kind),
+                rom_offset: segment.romoffset,
+                rom_size: segment.romsize,
+                current_bytes,
+                added_bytes: added,
+                max_bytes,
+            });
+        }
+
+        Ok(PatchImpactReport {
+            layout_id: spec.layout_id.clone(),
+            base_rom_id: spec.base_rom_id.clone(),
+            total_added_bytes,
+            per_segment: per_segment_reports,
+        })
+    }
+
+    /// Backwards-compatible helper if caller only cares about validity.
+    pub fn validate_patch_spec(
+        &self,
+        spec: &PatchSpec,
+        payload_index: &PayloadIndex,
+    ) -> Result<(), SoniaBridgeError> {
+        let _ = self.validate_patch_spec_with_report(spec, payload_index)?;
         Ok(())
     }
 }
 
-/// Convenience function for local testing: given a `RomLayout` and a single
-/// test patch payload, build both ArtifactSpecs and a minimal PatchSpec that
-/// replaces one known file.
+/// Convenience to build test artifacts for the tiny N64 slice.
 pub fn build_test_slice_artifacts(
     layout: &RomLayout,
     base_rom_id: &str,
@@ -238,7 +301,8 @@ pub fn build_test_slice_artifacts(
 ) -> Result<(ArtifactSpec, ArtifactSpec, PatchSpec), SoniaBridgeError> {
     let bridge = SoniaBridge::new(layout)?;
 
-    let layout_artifact = bridge.layout_to_artifact("artifacts/layouts/n64/test-layout.json");
+    let layout_artifact =
+        bridge.layout_to_artifact("artifacts/layouts/n64/test-layout.json");
     let patch_payload_artifact =
         bridge.rom_patch_to_artifact(payload_filename, payload_bytes);
 
