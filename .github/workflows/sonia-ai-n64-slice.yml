@@ -1,0 +1,161 @@
+# .github/workflows/sonia-ai-n64-slice.yml
+name: Sonia AI N64 Vertical Slice
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+      - feature/sonia-n64-slice
+    paths:
+      - "crates/n64-layout/**"
+      - "crates/sonia-core/**"
+      - "crates/starzip-core/**"
+      - "crates/starzip-cli/**"
+      - "schemas/**"
+      - "examples/n64/**"
+      - ".github/workflows/sonia-ai-n64-slice.yml"
+
+jobs:
+  n64-vertical-slice:
+    runs-on: ubuntu-latest
+
+    env:
+      RUST_BACKTRACE: 1
+      CARGO_TERM_COLOR: always
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: |
+            target
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build tools used by N64 slice
+        run: |
+          cargo build --release \
+            -p schema-gen \
+            -p sonia-core \
+            -p n64-layout \
+            -p starzip-cli \
+            -p gamemodeai-session
+
+      - name: Regenerate JSON Schemas
+        run: |
+          target/release/schema-gen \
+            --out-dir schemas
+
+      - name: Validate JSON configs against schemas
+        run: |
+          # Validate all example RomLayout and PatchSpec JSONs
+          # Adjust paths to match your repo layout.
+          for f in examples/n64/layouts/*.json; do
+            echo "Validating layout: $f"
+            target/release/jsonschema-validate \
+              --schema schemas/romlayout.schema.json \
+              --instance "$f"
+          done
+          for f in examples/n64/patches/*.json; do
+            echo "Validating patch spec: $f"
+            target/release/jsonschema-validate \
+              --schema schemas/patchspec.schema.json \
+              --instance "$f"
+          done
+          # Validate ArtifactSpecs intended for this slice, if any.
+          if ls examples/n64/artifacts/*.json 1>/dev/null 2>&1; then
+            for f in examples/n64/artifacts/*.json; do
+              echo "Validating artifact spec: $f"
+              target/release/jsonschema-validate \
+                --schema schemas/artifact-spec.schema.json \
+                --instance "$f"
+            done
+          fi
+
+      - name: Sonia validate and write artifacts
+        run: |
+          # Use Sonia as the only way to materialize artifacts into the repo.
+          set -e
+          mkdir -p artifacts/layouts/n64
+          mkdir -p artifacts/patches/n64
+
+          for spec in examples/n64/artifacts/*.json; do
+            echo "Sonia validate: $spec"
+            target/release/sonia-core validate --spec "$spec"
+
+            echo "Sonia write: $spec"
+            target/release/sonia-core write --spec "$spec" --repo-root .
+          done
+
+      - name: Run Starzip patch on test ROM
+        run: |
+          set -e
+          BASE_ROM="examples/n64/roms/test-rom.z64"
+          LAYOUT_JSON="examples/n64/layouts/test-layout.json"
+          PATCH_JSON="examples/n64/patches/test-patch.json"
+          OUT_ROM="target/n64/test-rom-patched.z64"
+
+          echo "Starzip rom-query sanity check"
+          target/release/starzip-cli rom-query \
+            --rom "$BASE_ROM" \
+            --layout "$LAYOUT_JSON" \
+            --addr 0x1000
+
+          echo "Starzip validate patch"
+          target/release/starzip-cli validate-patch \
+            --layout "$LAYOUT_JSON" \
+            --patch "$PATCH_JSON"
+
+          echo "Starzip apply patch"
+          target/release/starzip-cli patch \
+            --rom "$BASE_ROM" \
+            --layout "$LAYOUT_JSON" \
+            --spec "$PATCH_JSON" \
+            --out "$OUT_ROM"
+
+      - name: Headless emulator smoke test
+        run: |
+          set -e
+          OUT_ROM="target/n64/test-rom-patched.z64"
+
+          # Replace this with your real N64 emulator CLI.
+          # It should exit 0 on success, non-zero on failure.
+          target/release/conk64-cli run-headless \
+            --rom "$OUT_ROM" \
+            --frames 300 \
+            --assert-vram-write 0x80300000
+
+      - name: Collect CI digest for session profile
+        run: |
+          set -e
+          DIGEST_FILE="target/n64/sonia-n64-slice-ci-digest.json"
+          mkdir -p "$(dirname "$DIGEST_FILE")"
+
+          cat > "$DIGEST_FILE" << 'EOF'
+          {
+            "job": "sonia-ai-n64-slice",
+            "status": "ok",
+            "summary": "Schemas validated, Sonia artifacts written, Starzip patch applied, emulator booted for 300 frames.",
+            "timestamp": "${{ github.run_id }}",
+            "failures": []
+          }
+          EOF
+
+          target/release/gamemodeai-session update-ci-status \
+            --digest "$DIGEST_FILE"
+
+      - name: Upload patched ROM as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: n64-test-rom-patched
+          path: target/n64/test-rom-patched.z64
