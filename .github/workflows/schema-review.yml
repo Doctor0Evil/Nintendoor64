@@ -1,40 +1,66 @@
 name: schema-review
+
 on:
   pull_request:
     paths:
-      - 'schemas/**/*.schema.json'
+      - "schemas/**/*.schema.json"
+      - "schemas/**/*.json"
 
 jobs:
   review:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-      - name: Build schema-diff
-        run: cargo build -p schema-diff
-      - name: Generate PR diff comment
+
+      - name: Build schema-diff tool
+        run: cargo build --release -p schema-diff
+
+      - name: Generate schema diff comment
         id: gen
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD 'schemas/**/*.schema.json')
+          CHANGED=$(git diff --name-only "origin/$BASE_REF"...HEAD -- 'schemas/**/*.json' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "body=No schema changes detected." >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           BODY=""
           for F in $CHANGED; do
-            OLD=".schema-review/base/$F"
+            OLD=".schema-review-base/$F"
             mkdir -p "$(dirname "$OLD")"
-            git show "origin/${{ github.base_ref }}:$F" > "$OLD" || true
-            OUT=$(cargo run -p schema-diff -- --old "$OLD" --new "$F")
-            BODY="$BODY"$'\n\n'"$OUT"
+            git show "origin/$BASE_REF:$F" > "$OLD" || continue
+
+            OUT=$(target/release/schema-diff --old "$OLD" --new "$F")
+            BODY="$BODY
+
+### Diff for \`$F\`
+
+$OUT
+"
           done
-          BODY="${BODY:-'No schema changes detected.'}"
-          jq -n --arg body "$BODY" '{body:$body}' > body.json
-      - name: Post comment
+
+          BODY=${BODY:-"No schema changes detected."}
+          BODY_JSON=$(jq -n --arg body "$BODY" '{body:$body}')
+          echo "body_json=$BODY_JSON" >> "$GITHUB_OUTPUT"
+
+      - name: Post PR comment
+        if: steps.gen.outputs.body_json != ''
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl -s -X POST \
-            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Authorization: token $GH_TOKEN" \
             -H "Content-Type: application/json" \
-            -d @body.json \
+            -d '${{ steps.gen.outputs.body_json }}' \
             "${{ github.api_url }}/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
