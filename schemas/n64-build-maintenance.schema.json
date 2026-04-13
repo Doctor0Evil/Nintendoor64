@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "id": "https://gamemode.ai/schemas/n64-build-maintenance.schema.json",
+  "title": "N64BuildMaintenance",
+  "type": "object",
+  "definitions": {
+    "MaintenanceCommand": {
+      "type": "string",
+      "enum": ["CleanTarget"]
+    },
+    "MaintenancePreviewRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "workspaceRoot"],
+      "properties": {
+        "command": { "$ref": "#/definitions/MaintenanceCommand" },
+        "workspaceRoot": { "type": "string" }
+      }
+    },
+    "MaintenanceImpact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["impactSummary", "paths"],
+      "properties": {
+        "impactSummary": { "type": "string" },
+        "bytesToFree": { "type": "integer", "minimum": 0 },
+        "paths": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "MaintenancePreviewResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["confirmationToken", "impact"],
+      "properties": {
+        "confirmationToken": { "type": "string" },
+        "impact": { "$ref": "#/definitions/MaintenanceImpact" }
+      }
+    },
+    "MaintenanceConfirmRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["confirmationToken", "command", "workspaceRoot"],
+      "properties": {
+        "confirmationToken": { "type": "string" },
+        "command": { "$ref": "#/definitions/MaintenanceCommand" },
+        "workspaceRoot": { "type": "string" }
+      }
+    },
+    "MaintenanceConfirmResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "message"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "message": { "type": "string" },
+        "bytesFreed": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}
