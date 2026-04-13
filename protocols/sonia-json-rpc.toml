@@ -1,0 +1,47 @@
+# Nintendoor64/protocols/sonia-json-rpc.toml
+# Canonical IDL for Sonia-family JSON-RPC-like envelopes
+# Used by cbindgen-style generation for Rust types + docs
+
+[envelope]
+version = "1.0"
+description = "Stateless JSON request/response envelope for AI↔Sonia CLI communication"
+
+[envelope.fields]
+version = { type = "string", required = true, description = "Protocol version, e.g. '1.0'" }
+request_id = { type = "string", required = true, description = "Opaque ID for correlating request/response" }
+method = { type = "string", required = true, description = "Command verb: validate, write, list, getsession, etc." }
+params = { type = "object", required = false, description = "Command-specific parameters (schema-validated)" }
+
+[response.fields]
+request_id = { type = "string", required = true, description = "Echo of request request_id" }
+status = { type = "string", enum = ["ok", "error"], required = true }
+result = { type = "object", required_if = "status==ok", description = "Command output payload" }
+error = { type = "object", required_if = "status==error", description = "Error details with code/message" }
+
+[error_codes]
+# Generic protocol errors
+"InvalidEnvelope" = "Request envelope failed schema validation"
+"UnknownMethod" = "Command verb not recognized by target CLI"
+"VersionMismatch" = "Client/server protocol versions incompatible"
+
+# Sonia-specific invariant errors
+"BudgetOverflowN64" = "Artifact exceeds N64 ROM/VRAM constraints"
+"DeterminismViolationCoreEcs" = "Code uses forbidden non-deterministic patterns"
+"UnsafePatchRegion" = "Patch interval overlaps read-only or protected ROM segment"
+"AbiBreakingChange" = "Proposed C API modification breaks public contract"
+
+# Session/gating errors
+"ForbiddenInCurrentSession" = "Command disallowed by active SessionProfile invariants"
+"CiFailureBlocking" = "Outstanding CI failures prevent this operation"
+
+[headers.optional]
+platform = { type = "string", description = "Target console: N64, NES, PS1, etc." }
+session_id = { type = "string", description = "SessionProfile identifier for context" }
+min_supported_version = { type = "string", description = "Minimum protocol version client accepts" }
+max_supported_version = { type = "string", description = "Maximum protocol version client accepts" }
+
+[version_negotiation]
+# Compatibility rule: intersection of [client_min, client_max] and [server_min, server_max] must be non-empty
+# Negotiated version = max(client_min, server_min) clamped to min(client_max, server_max)
+algorithm = "interval_overlap"
+fallback_on_mismatch = "VersionMismatch"
