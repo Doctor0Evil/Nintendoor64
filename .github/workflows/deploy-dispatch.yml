@@ -1,0 +1,30 @@
+name: deploy-dispatch
+on:
+  push:
+    paths:
+      - 'deploy-requests/*.json'
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read deploy request
+        id: read
+        run: |
+          FILE=$(git diff --name-only HEAD^ HEAD | grep '^deploy-requests/' | head -n1)
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+      - name: Validate deploy request
+        run: |
+          cargo run -p schema-guard -- \
+            --schema schemas/deploy-request.schema.json \
+            --instances "${{ steps.read.outputs.file }}"
+      - name: Dispatch workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BODY=$(cat "${{ steps.read.outputs.file }}")
+          WF=$(jq -r '.workflow' <<< "$BODY")
+          REF=$(jq -r '.refspec' <<< "$BODY")
+          PARAMS=$(jq -c '.parameters' <<< "$BODY")
+          gh workflow run "$WF" --ref "$REF" --json "$PARAMS"
