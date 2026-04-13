@@ -159,3 +159,19 @@ jobs:
         with:
           name: n64-test-rom-patched
           path: target/n64/test-rom-patched.z64
+- name: Run N64 contract with trace
+  run: |
+    cargo run -p gamemodeai-build -- \
+      --contract examples/build.conker.underworld.n64.contract.json
+
+- name: Generate flamegraph
+  run: |
+    cargo run -p build-trace-flamegraph -- \
+      --trace artifacts/meta/build-trace.json \
+      --out-dir artifacts/meta
+
+- name: Validate build trace against schema
+  run: |
+    schema-guard \
+      --schema schemas/gamemodeai.build.trace.schema.json \
+      --instance artifacts/meta/build-trace.json
