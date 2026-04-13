@@ -1,6 +1,6 @@
 {
   "repo": "Doctor0Evil/Nintendoor64",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "features": [
     {
       "id": "nintendoor64.rom_layout_oracle",
@@ -33,8 +33,250 @@
       ]
     },
     {
-      "id": "nintendoor64.safe_patch_synthesizer",
+      "id": "nintendoor64.starzip.romlayout",
+      "title": "N64 ROM Layout Oracle",
+      "description": "Typed access to N64 ROM structure: segments, files, compression, and VRAM mapping, with invariants enforced by RomLayout validators.",
+      "tags": [
+        "Nintendoor64",
+        "Starzip",
+        "N64",
+        "RomLayout",
+        "Deterministic"
+      ],
+      "systems": [
+        "systems.nintendoor64.starzip.layout",
+        "systems.nintendoor64.starzip.cli"
+      ],
+      "schemas": [
+        "schemas/romlayout.schema.json"
+      ],
+      "examples": [
+        "examples/n64/layouts/layout.minimal.json",
+        "examples/n64/layouts/layout.goldeneye-slice.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.starzip.patch",
       "title": "Safe Patch Synthesizer",
+      "description": "High-level patch authoring for N64 ROMs via PatchSpec and ArtifactSpec payloads, compiled into safe byte intervals checked against RomLayout.",
+      "tags": [
+        "Nintendoor64",
+        "Starzip",
+        "N64",
+        "PatchSynthesizer",
+        "BinarySafe"
+      ],
+      "systems": [
+        "systems.nintendoor64.starzip.patch",
+        "systems.nintendoor64.sonia"
+      ],
+      "schemas": [
+        "schemas/patchspec.schema.json",
+        "schemas/artifact-spec.schema.json"
+      ],
+      "examples": [
+        "examples/n64/patches/patch.safe-title.json",
+        "examples/n64/patches/patch.boot-hook.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.starzip.budget",
+      "title": "Hardware-Aware Budget Planner",
+      "description": "Budget analysis for N64 ROM and RDRAM profiles, reporting per-segment and per-asset-class usage and enforcing N64Constraints.",
+      "tags": [
+        "Nintendoor64",
+        "Starzip",
+        "N64",
+        "BudgetPlanner",
+        "Constraints"
+      ],
+      "systems": [
+        "systems.nintendoor64.starzip.budget",
+        "systems.nintendoor64.constraints.n64"
+      ],
+      "schemas": [
+        "schemas/n64-constraints.schema.json",
+        "schemas/budget-report.schema.json"
+      ],
+      "examples": [
+        "examples/n64/budgets/n64-default-32mb.json",
+        "examples/n64/budgets/report.sample.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.sonia.artifacts",
+      "title": "Sonia Artifact Sink",
+      "description": "Canonical ArtifactSpec surface for AI-authored payloads such as ROM patches, Lua scripts, and config files, with size and encoding policies.",
+      "tags": [
+        "Nintendoor64",
+        "Sonia",
+        "ArtifactSink",
+        "BinarySafe",
+        "AIChat"
+      ],
+      "systems": [
+        "systems.nintendoor64.sonia"
+      ],
+      "schemas": [
+        "schemas/artifact-spec.schema.json"
+      ],
+      "examples": [
+        "examples/sonia/artifacts/n64-patch-payload.base64.json",
+        "examples/sonia/artifacts/lua-script.text.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.sonia.featurelayout",
+      "title": "Sonia Feature Layout Navigator",
+      "description": "Read-only navigation index over Nintendoor64 features, mapping concept names to SystemNodes, schemas, and example JSON artifacts.",
+      "tags": [
+        "Nintendoor64",
+        "Sonia",
+        "FeatureLayout",
+        "CLI",
+        "AIChat"
+      ],
+      "systems": [
+        "systems.nintendoor64.sonia.featurelayout",
+        "systems.knowledgegraph.core"
+      ],
+      "schemas": [
+        "schemas/featurelayout.schema.json",
+        "schemas/systems.schema.json"
+      ],
+      "examples": [
+        "knowledgegraph/features.sonia.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.session.n64-constraints",
+      "title": "N64 Session Profiles and Invariants",
+      "description": "SessionProfile-based constraint layer for N64 projects, encoding active target, N64Constraints profiles, and invariants such as ROM size ceilings and determinism rules.",
+      "tags": [
+        "Nintendoor64",
+        "Sonia",
+        "SessionProfile",
+        "Invariants",
+        "Deterministic"
+      ],
+      "systems": [
+        "systems.gamemodeai.session",
+        "systems.nintendoor64.starzip.budget",
+        "systems.nintendoor64.starzip.patch"
+      ],
+      "schemas": [
+        "schemas/session.schema.json",
+        "schemas/n64-constraints.schema.json"
+      ],
+      "examples": [
+        "examples/session/.gamemodeai-session-main.n64.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.emulator.scenario-director",
+      "title": "Emulator Scenario Director",
+      "description": "Defines and runs deterministic emulator scenarios for N64 ROMs, driving scripted inputs and checking telemetry for pass/fail signals.",
+      "tags": [
+        "Nintendoor64",
+        "Emulator",
+        "ScenarioDirector",
+        "Testing",
+        "Deterministic"
+      ],
+      "systems": [
+        "systems.nintendoor64.conk64.scenario",
+        "systems.nintendoor64.starzip.cli"
+      ],
+      "schemas": [
+        "schemas/emulator-scenario.schema.json"
+      ],
+      "examples": [
+        "examples/n64/scenarios/boot-hook-assert.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.build.vertical-slice",
+      "title": "N64 ROM Layout Oracle + Safe Patch Synth Vertical Slice",
+      "description": "End-to-end pipeline from AI-authored layouts and patches through Sonia, Starzip, and emulator smoke tests for a single N64 test ROM.",
+      "tags": [
+        "Nintendoor64",
+        "Starzip",
+        "Sonia",
+        "VerticalSlice",
+        "CI"
+      ],
+      "systems": [
+        "systems.nintendoor64.starzip.layout",
+        "systems.nintendoor64.starzip.patch",
+        "systems.nintendoor64.starzip.budget",
+        "systems.nintendoor64.sonia",
+        "systems.nintendoor64.conk64.scenario"
+      ],
+      "schemas": [
+        "schemas/romlayout.schema.json",
+        "schemas/patchspec.schema.json",
+        "schemas/artifact-spec.schema.json",
+        "schemas/emulator-scenario.schema.json"
+      ],
+      "examples": [
+        "examples/n64/pipelines/vertical-slice.plan.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.retro-cli.integration",
+      "title": "Retro / Build Integration via Sonia",
+      "description": "Integration layer where retro-cli and gamemodeai-build emit ArtifactSpec and SessionProfile snippets instead of ad-hoc logs, with Sonia as the single contract layer between orchestration and build.",
+      "tags": [
+        "Nintendoor64",
+        "Retro",
+        "BuildPipeline",
+        "Sonia",
+        "ArtifactSpec"
+      ],
+      "systems": [
+        "systems.gamemodeai.retro-cli",
+        "systems.gamemodeai.build",
+        "systems.nintendoor64.sonia"
+      ],
+      "schemas": [
+        "schemas/artifact-spec.schema.json",
+        "schemas/session.schema.json"
+      ],
+      "examples": [
+        "examples/retro/retro-cli-artifactspec-log.json",
+        "examples/build/gamemodeai-build-session-snippet.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.sonia.turn-harness",
+      "title": "Sonia AI Turn Harness",
+      "description": "A deterministic harness that snapshots SessionProfile, runs a JSON plan of Sonia and retro CLIs, and emits a final summary as the unit of one AI turn.",
+      "tags": [
+        "Nintendoor64",
+        "Sonia",
+        "Harness",
+        "AIChat",
+        "Testing"
+      ],
+      "systems": [
+        "systems.nintendoor64.sonia.turn-harness",
+        "systems.gamemodeai.session",
+        "systems.nintendoor64.starzip.cli",
+        "systems.gamemodeai.retro-cli"
+      ],
+      "schemas": [
+        "schemas/session.schema.json",
+        "schemas/sonia-turn-plan.schema.json",
+        "schemas/sonia-turn-summary.schema.json"
+      ],
+      "examples": [
+        "examples/sonia/turns/turn-plan.simple-n64.json",
+        "examples/sonia/turns/turn-summary.simple-n64.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.safe_patch_synthesizer",
+      "title": "Safe Patch Synthesizer (Cross-Platform)",
       "description": "Schema-validated patch synthesizer that takes high-level ArtifactSpecs (scripts, tables, state machines) and compiles them into safe patch bundles wired through Starzip or emulator injection, always routed via explicit ROM layout contracts instead of raw hex editing.",
       "tags": [
         "Nintendoor64",
@@ -123,7 +365,7 @@
     },
     {
       "id": "nintendoor64.emulator_scenario_director",
-      "title": "Emulator Scenario Director",
+      "title": "Emulator Scenario Director (Extended)",
       "description": "Lua and Rust-powered scenario director for N64 and other retro platforms that drives emulators through deterministic hooks, loading scripted states, camera paths, and AI behaviors for automated playthroughs, smoke tests, and capture sessions.",
       "tags": [
         "Nintendoor64",
