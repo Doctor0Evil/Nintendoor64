@@ -1,0 +1,35 @@
+{
+  "profileId": "n64.conker-mini.8mb",
+  "romMaxBytes": 8388608,
+  "rdramBytes": 8388608,
+  "segmentBudgets": [
+    {
+      "segment": "BOOT",
+      "maxBytes": 262144,
+      "mutable": false
+    },
+    {
+      "segment": "LEVEL1",
+      "maxBytes": 2097152,
+      "mutable": true
+    },
+    {
+      "segment": "ASSETS",
+      "maxBytes": 2097152,
+      "mutable": true
+    }
+  ],
+  "forbiddenRegions": [
+    {
+      "segment": "BOOT",
+      "label": "boot_vector",
+      "romOffset": 0,
+      "length": 4096
+    }
+  ],
+  "checks": {
+    "requireEntrypointInBoot": true,
+    "requireNonOverlappingSegments": true,
+    "requireFilesWithinSegments": true
+  }
+}
