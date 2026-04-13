@@ -3,20 +3,20 @@ use schemars::JsonSchema;
 
 use crate::artifact::ArtifactEncoding;
 
-/// High-level patch spec that compiles to concrete ROM intervals.
+/// High-level patch specification for N64 ROMs.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PatchSpec {
-    /// Schema version of PatchSpec.
+    /// Schema / format version.
     pub version: u32,
 
-    /// Identifier of the base ROM (e.g., SHA-256 of original .z64).
+    /// Identifier of the base ROM (e.g. SHA-256 of original .z64).
     pub base_rom_id: String,
 
-    /// Identifier or path for the RomLayout this patch targets.
+    /// Identifier or path of the RomLayout this patch targets.
     pub layout_id: String,
 
-    /// High-level edits.
+    /// Individual edits.
     pub edits: Vec<PatchEdit>,
 
     /// Optional source file path for diagnostics.
@@ -28,7 +28,7 @@ pub struct PatchSpec {
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum PatchEdit {
-    /// Replace a logical file by path.
+    /// Replace a logical file by RomLayout FileEntry.path.
     ReplaceFile {
         /// Logical FileEntry.path in RomLayout.
         logical_path: String,
@@ -37,7 +37,7 @@ pub enum PatchEdit {
         payload_ref: String,
 
         /// Encoding used in the ArtifactSpec content.
-        encoding: ArtifactEncoding
+        encoding: ArtifactEncoding,
     },
 
     /// Insert a boot hook at a well-defined ROM offset.
@@ -51,7 +51,8 @@ pub enum PatchEdit {
         /// ArtifactSpec.filename of the hook payload.
         payload_ref: String,
 
-        encoding: ArtifactEncoding
+        /// Encoding used in the ArtifactSpec content.
+        encoding: ArtifactEncoding,
     },
 
     /// JSON patch applied to a JSON file inside the ROM FS.
@@ -63,7 +64,7 @@ pub enum PatchEdit {
         json_pointer: String,
 
         /// Value to apply at pointer.
-        value: serde_json::Value
+        value: serde_json::Value,
     },
 
     /// Explicit ROM interval patch (escape hatch, still constrained by layout).
@@ -77,6 +78,7 @@ pub enum PatchEdit {
         /// ArtifactSpec.filename of the payload.
         payload_ref: String,
 
-        encoding: ArtifactEncoding
-    }
+        /// Encoding used in the ArtifactSpec content.
+        encoding: ArtifactEncoding,
+    },
 }
