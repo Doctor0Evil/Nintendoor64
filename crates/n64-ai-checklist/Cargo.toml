@@ -1,0 +1,3 @@
+[[bin]]
+name = "n64-ai-gen-schemas"
+path = "src/bin/gen-schemas.rs"
