@@ -2,15 +2,16 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "N64 RomLayout",
   "type": "object",
-  "required": ["entrypoint", "romSize", "segments", "files"],
+  "required": ["entryPoint", "romSize", "segments", "files"],
   "properties": {
-    "entrypoint": { "type": "integer", "minimum": 0 },
+    "entryPoint": { "type": "integer", "minimum": 0 },
     "romSize": { "type": "integer", "minimum": 0 },
     "segments": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["name", "kind", "romOffset", "romSize", "vramStart", "compression"],
+        "additionalProperties": false,
         "properties": {
           "name": { "type": "string" },
           "kind": {
@@ -19,7 +20,9 @@
               {
                 "type": "object",
                 "required": ["Other"],
-                "properties": { "Other": { "type": "string" } },
+                "properties": {
+                  "Other": { "type": "string" }
+                },
                 "additionalProperties": false
               }
             ]
@@ -33,14 +36,15 @@
               {
                 "type": "object",
                 "required": ["Custom"],
-                "properties": { "Custom": { "type": "string" } },
+                "properties": {
+                  "Custom": { "type": "string" }
+                },
                 "additionalProperties": false
               }
             ]
           },
           "mutable": { "type": "boolean", "default": false }
-        },
-        "additionalProperties": false
+        }
       }
     },
     "files": {
@@ -48,14 +52,14 @@
       "items": {
         "type": "object",
         "required": ["path", "segment", "offsetInSegment", "length", "contentType"],
+        "additionalProperties": false,
         "properties": {
           "path": { "type": "string" },
           "segment": { "type": "string" },
           "offsetInSegment": { "type": "integer", "minimum": 0 },
           "length": { "type": "integer", "minimum": 0 },
           "contentType": { "type": "string" }
-        },
-        "additionalProperties": false
+        }
       }
     }
   },
