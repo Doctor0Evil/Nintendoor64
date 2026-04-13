@@ -45,3 +45,11 @@ max_supported_version = { type = "string", description = "Maximum protocol versi
 # Negotiated version = max(client_min, server_min) clamped to min(client_max, server_max)
 algorithm = "interval_overlap"
 fallback_on_mismatch = "VersionMismatch"
+
+[[methods]]
+id = "gamemodeai-rust.run-cargo"
+cli = "gamemodeai-rust-cli"
+description = "Run cargo check/build in a deterministic, JSON-driven way."
+stdin_schema = "schemas/gamemodeai.rust.run-cargo-params.schema.json"
+stdout_schema = "schemas/gamemodeai.rust.run-cargo-result.schema.json"
+non_interactive = true
