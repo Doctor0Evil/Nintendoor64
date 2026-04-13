@@ -1,0 +1,17 @@
+{
+  "jsonrpc": "2.0",
+  "id": "run-cargo-1",
+  "method": "gamemodeai-rust.run-cargo",
+  "params": {
+    "op": "Check",
+    "selection": {
+      "Workspace": []
+    },
+    "features": [],
+    "allFeatures": false,
+    "target": null,
+    "profile": "debug",
+    "targetDir": "target/ai-check",
+    "extraFlags": ["--locked"]
+  }
+}
