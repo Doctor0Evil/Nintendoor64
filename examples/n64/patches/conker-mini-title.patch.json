@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "baseRomId": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "layoutId": "n64.conker-mini.layout.v1",
+  "edits": [
+    {
+      "kind": "ReplaceFile",
+      "logicalPath": "textures/title/title-screen.rgba16",
+      "payloadRef": "artifacts/patches/n64/conker-mini/title-screen-new.bin",
+      "encoding": "Base64"
+    },
+    {
+      "kind": "BootHook",
+      "hookKind": "debugPatternWrite",
+      "params": {
+        "segment": "BOOT",
+        "romOffset": 8192,
+        "length": 16,
+        "payloadRef": "artifacts/patches/n64/conker-mini/boot-hook.bin",
+        "encoding": "Hex"
+      }
+    }
+  ]
+}
