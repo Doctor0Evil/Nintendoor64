@@ -1,30 +1,48 @@
 name: deploy-dispatch
+
 on:
   push:
     paths:
-      - 'deploy-requests/*.json'
+      - "deploy-requests/*.json"
 
 jobs:
   dispatch:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      actions: write
+      pull-requests: read
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Read deploy request
-        id: read
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find latest deploy request
+        id: find
         run: |
-          FILE=$(git diff --name-only HEAD^ HEAD | grep '^deploy-requests/' | head -n1)
+          FILE=$(git diff --name-only HEAD~1..HEAD -- 'deploy-requests/*.json' | head -n 1 || true)
+          if [ -z "$FILE" ]; then
+            echo "No deploy request file found in this push"
+            exit 1
+          fi
           echo "file=$FILE" >> "$GITHUB_OUTPUT"
-      - name: Validate deploy request
+
+      - name: Validate deploy request schema
         run: |
           cargo run -p schema-guard -- \
             --schema schemas/deploy-request.schema.json \
-            --instances "${{ steps.read.outputs.file }}"
-      - name: Dispatch workflow
+            --instances "${{ steps.find.outputs.file }}"
+
+      - name: Dispatch target workflow
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BODY=$(cat "${{ steps.read.outputs.file }}")
-          WF=$(jq -r '.workflow' <<< "$BODY")
-          REF=$(jq -r '.refspec' <<< "$BODY")
-          PARAMS=$(jq -c '.parameters' <<< "$BODY")
-          gh workflow run "$WF" --ref "$REF" --json "$PARAMS"
+          BODY=$(cat "${{ steps.find.outputs.file }}")
+          WF=$(jq -r '.workflow' <<<"$BODY")
+          REF=$(jq -r '.refspec' <<<"$BODY")
+          INPUTS=$(jq -c '.parameters // {}' <<<"$BODY")
+
+          gh workflow run "$WF" \
+            --ref "$REF" \
+            --raw-field "inputs=$INPUTS"
