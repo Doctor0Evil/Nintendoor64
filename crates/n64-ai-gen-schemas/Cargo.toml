@@ -1,0 +1,46 @@
+# Nintendoor64/crates/n64-ai-gen-schemas/Cargo.toml
+[package]
+name = "n64-ai-gen-schemas"
+version = "0.1.0"
+edition = "2021"
+description = "JSON Schema generator for Nintendoor64 AI-contract artifacts"
+license = "MIT"
+publish = false
+
+[dependencies]
+# Core serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# JSON Schema generation via schemars
+schemars = { version = "0.8", features = ["derive"] }
+
+# CLI argument parsing (optional but recommended)
+clap = { version = "4.4", features = ["derive"] }
+
+# TOML support for protocol specs
+toml = "0.8"
+
+# File watching for dev loops
+notify = "6.1"
+
+# Path utilities
+pathdiff = "0.2"
+
+# Nintendoor64 core types (local path dependency)
+sonia-core = { path = "../sonia-core", optional = true }
+n64-layout = { path = "../n64-layout", optional = true }
+gamemodeai-session = { path = "../gamemodeai-session", optional = true }
+
+[features]
+default = ["full"]
+full = ["sonia-core", "n64-layout", "gamemodeai-session"]
+minimal = []
+
+[[bin]]
+name = "n64-ai-gen-schemas"
+path = "src/bin/gen-schemas.rs"
+
+[lib]
+name = "n64_ai_gen_schemas"
+path = "src/lib.rs"
