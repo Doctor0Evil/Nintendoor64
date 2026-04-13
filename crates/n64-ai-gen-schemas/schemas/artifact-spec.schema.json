@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nintendoor64.ai/schemas/v1/ArtifactSpec",
+  "title": "ArtifactSpec",
+  "description": "Canonical schema for AI-generated binary/text artifacts in the Nintendoor64 Sonia pipeline. All AI outputs must conform to this contract before reaching file I/O.",
+  "type": "object",
+  "required": ["id", "kind", "encoding", "payload_ref"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this artifact (UUID or hash-based)",
+      "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+    },
+    "kind": {
+      "$ref": "#/$defs/ArtifactType",
+      "description": "Classification of artifact content and intended use"
+    },
+    "encoding": {
+      "$ref": "#/$defs/EncodingMode",
+      "description": "How the payload bytes are represented in JSON"
+    },
+    "payload_ref": {
+      "type": "string",
+      "description": "Path reference to actual payload file (relative to artifacts/ dir)",
+      "examples": ["artifacts/n64/patches/boot_hook.bin", "artifacts/configs/stealth.json"]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional contextual metadata for AI conditioning",
+      "properties": {
+        "platform": {
+          "type": "string",
+          "enum": ["N64", "NES", "SNES", "PS1", "Multi"],
+          "description": "Target console platform"
+        },
+        "segment": {
+          "type": "string",
+          "description": "ROM segment or memory region this artifact affects"
+        },
+        "invariants_checked": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of invariant rule IDs this artifact has been validated against"
+        }
+      }
+    },
+    "checksum": {
+      "type": "string",
+      "description": "SHA-256 hex digest of payload for integrity verification",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "$defs": {
+    "ArtifactType": {
+      "type": "string",
+      "enum": [
+        "N64RomPatch",
+        "N64RomLayout",
+        "NesChrBank",
+        "NesNametable",
+        "Ps1IsoPatch",
+        "LuaScript",
+        "JsonConfig",
+        "TextAsset",
+        "BinaryBlob"
+      ],
+      "description": "Known artifact classifications for routing and validation"
+    },
+    "EncodingMode": {
+      "type": "string",
+      "enum": ["Text", "Hex", "Base64", "BinaryRef"],
+      "description": "Payload encoding strategy for JSON transport"
+    }
+  }
+}
