@@ -1,0 +1,300 @@
+{
+  "repo": "Doctor0Evil/Nintendoor64",
+  "version": "0.1.0",
+  "features": [
+    {
+      "id": "nintendoor64.rom_layout_oracle",
+      "title": "ROM Layout Oracle",
+      "description": "Read-only ROM layout oracle for Nintendoor64-era builds that answers \"what lives where\" questions: segments, banks, file systems, RAM mappings, and budget slices, so AI-Chat can target edits without ever touching raw offsets directly.",
+      "tags": [
+        "Nintendoor64",
+        "Starzip",
+        "RomLayout",
+        "Oracle",
+        "ReadOnly",
+        "N64",
+        "PS1",
+        "NES"
+      ],
+      "systems": [
+        "systems.nintendoor64.starzip.layout_oracle",
+        "systems.nintendoor64.sonia.featurelayout",
+        "systems.knowledgegraph.core"
+      ],
+      "schemas": [
+        "schemas/romlayout.schema.json",
+        "schemas/systemnode.schema.json",
+        "schemas/featurelayout.schema.json"
+      ],
+      "examples": [
+        "examples/romlayout/banjo_tooie_layout.json",
+        "examples/romlayout/goldeneye_layout.json",
+        "knowledgegraph/systems.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.safe_patch_synthesizer",
+      "title": "Safe Patch Synthesizer",
+      "description": "Schema-validated patch synthesizer that takes high-level ArtifactSpecs (scripts, tables, state machines) and compiles them into safe patch bundles wired through Starzip or emulator injection, always routed via explicit ROM layout contracts instead of raw hex editing.",
+      "tags": [
+        "Nintendoor64",
+        "Sonia",
+        "ArtifactSpec",
+        "Patch",
+        "SafeEdit",
+        "Starzip"
+      ],
+      "systems": [
+        "systems.nintendoor64.sonia",
+        "systems.nintendoor64.starzip.patcher",
+        "systems.retro.nes.packer.nrom_128"
+      ],
+      "schemas": [
+        "schemas/artifactspec.schema.json",
+        "schemas/rompatch.schema.json",
+        "schemas/systemnode.schema.json"
+      ],
+      "examples": [
+        "examples/artifactspec/goldeneye_guard_stealth_patch.json",
+        "examples/artifactspec/banjo_room_lightmap_patch.json",
+        "examples/patchbundle/sample_patch_bundle.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.pattern_composer",
+      "title": "Design Pattern Composer",
+      "description": "Knowledge-graph-backed pattern composer that lets AI-Chat and humans slot reusable gameplay and level design patterns (Bond stealth arenas, hub-and-spoke dungeons, survival horror camera grids) into new projects via typed recipe and parameter schemas.",
+      "tags": [
+        "Nintendoor64",
+        "Patterns",
+        "GameDesign",
+        "Recipe",
+        "SchemaFirst",
+        "KnowledgeGraph"
+      ],
+      "systems": [
+        "systems.gamemodeai.patterns.core",
+        "systems.nintendoor64.bondfpscore",
+        "systems.nintendoor64.caprom.core",
+        "systems.nintendoor64.sonia.featurelayout"
+      ],
+      "schemas": [
+        "schemas/gamerecipe.schema.json",
+        "schemas/patterntemplate.schema.json",
+        "schemas/stealthparams.schema.json",
+        "schemas/narrativegraph.schema.json"
+      ],
+      "examples": [
+        "examples/patterns/bond_fps_stealth_arena.json",
+        "examples/patterns/resident_style_horror_loop.json",
+        "examples/patterns/snes_underworld_platformer.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.build_conductor",
+      "title": "Retro Build Conductor",
+      "description": "Orchestrator surface that wires Sonia, Starzip, retro-CLI, and emulator harnesses into one contract-first build pipeline, so AI-Chat can schedule multi-step NES/SNES/N64/PS1 builds as a single high-level job using knowledge-graph-scoped commands.",
+      "tags": [
+        "Nintendoor64",
+        "Build",
+        "Orchestration",
+        "CI",
+        "RetroCLI",
+        "Starzip",
+        "Sonia"
+      ],
+      "systems": [
+        "systems.retro.cli",
+        "systems.nintendoor64.starzip.build_conductor",
+        "systems.nintendoor64.sonia",
+        "systems.ci.jobs.retro_builds"
+      ],
+      "schemas": [
+        "schemas/buildrecipe.schema.json",
+        "schemas/sessionprofile.schema.json",
+        "schemas/artifactspec.schema.json",
+        "schemas/systemnode.schema.json"
+      ],
+      "examples": [
+        "examples/builds/nes_nrom128_map_buildrecipe.json",
+        "examples/builds/n64_mission_buildrecipe.json",
+        "examples/builds/ps1_full_game_buildrecipe.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.emulator_scenario_director",
+      "title": "Emulator Scenario Director",
+      "description": "Lua and Rust-powered scenario director for N64 and other retro platforms that drives emulators through deterministic hooks, loading scripted states, camera paths, and AI behaviors for automated playthroughs, smoke tests, and capture sessions.",
+      "tags": [
+        "Nintendoor64",
+        "Conk64",
+        "Scenario",
+        "Emulator",
+        "Lua",
+        "Automation"
+      ],
+      "systems": [
+        "systems.nintendoor64.conk64",
+        "systems.retro.emulator.driver",
+        "systems.ci.jobs.scenario_smoketest"
+      ],
+      "schemas": [
+        "schemas/scenariobundle.schema.json",
+        "schemas/emulatorprofile.schema.json",
+        "schemas/systemnode.schema.json"
+      ],
+      "examples": [
+        "examples/scenarios/goldeneye_facility_stealth_walkthrough.json",
+        "examples/scenarios/perfect_dark_combat_sandbox.json",
+        "examples/scenarios/caprom_horror_intro_room.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.mechanic_transplant",
+      "title": "Mechanic Transplant Lab",
+      "description": "Mechanic transplant lab that formalizes gameplay systems (stealth, lock-on, horror inventory, platforming) as data contracts and ECS modules, enabling AI-Chat to move a tuned mechanic from one project or genre shell into another with deterministic constraints.",
+      "tags": [
+        "Nintendoor64",
+        "MechanicTransplant",
+        "ECS",
+        "BondFPS",
+        "CapROM",
+        "Reuse"
+      ],
+      "systems": [
+        "systems.nintendoor64.bondfpscore",
+        "systems.nintendoor64.caprom.core",
+        "systems.gamemodeai.ecs.core",
+        "systems.knowledgegraph.core"
+      ],
+      "schemas": [
+        "schemas/stealthparams.schema.json",
+        "schemas/lockonconfig.schema.json",
+        "schemas/enemystatblock.schema.json",
+        "schemas/missiondag.schema.json"
+      ],
+      "examples": [
+        "examples/mechanics/bond_guard_stealth_profile.json",
+        "examples/mechanics/resident_style_inventory_rules.json",
+        "examples/mechanics/platformer_movement_tuning.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.visual_diff_analyst",
+      "title": "Visual Diff Analyst",
+      "description": "Visual diff analyst that compares emulator captures, in-engine frames, or asset revisions as structured artifacts, surfacing tile/texture/lighting/layout differences through JSON descriptors that AI-Chat can reason about without seeing the raw images.",
+      "tags": [
+        "Nintendoor64",
+        "VisualDiff",
+        "Emulator",
+        "Testing",
+        "Assets"
+      ],
+      "systems": [
+        "systems.retro.visualdiff.core",
+        "systems.nintendoor64.conk64",
+        "systems.ci.jobs.visual_regression"
+      ],
+      "schemas": [
+        "schemas/visualdiffreport.schema.json",
+        "schemas/emulatorcapture.schema.json",
+        "schemas/systemnode.schema.json"
+      ],
+      "examples": [
+        "examples/visualdiff/goldeneye_lighting_regression.json",
+        "examples/visualdiff/mario_underworld_tileset_update.json",
+        "examples/visualdiff/horror_scene_color_grade_change.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.narrative_cartographer",
+      "title": "Narrative Graph Cartographer",
+      "description": "Narrative cartographer for PD2-style heists and Bond-style missions that models missions as narrative graphs with stealth profiles, reputations, and branching constraints, plus analysis tools for reachability, dead-ends, and difficulty envelopes.",
+      "tags": [
+        "Nintendoor64",
+        "Narrative",
+        "Graph",
+        "PD2",
+        "BondFPS",
+        "Stealth"
+      ],
+      "systems": [
+        "systems.nintendoor64.narrative.core",
+        "systems.nintendoor64.bondfpscore",
+        "systems.knowledgegraph.core"
+      ],
+      "schemas": [
+        "schemas/narrativegraph.schema.json",
+        "schemas/reputationmodel.schema.json",
+        "schemas/stealthprofile.schema.json"
+      ],
+      "examples": [
+        "examples/narrative/pd2_heist_story_graph.json",
+        "examples/narrative/bond_mission_blueprint.json",
+        "examples/narrative/hub_and_spoke_campaign.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.budget_planner",
+      "title": "Hardware Budget Planner",
+      "description": "Hardware-aware budget planner that exposes VRAM, ROM, CPU, and IO ceilings as explicit BudgetProfile contracts for NES/SNES/N64/PS1, enabling AI-Chat to reason about content and mechanic choices that stay within deterministic platform envelopes.",
+      "tags": [
+        "Nintendoor64",
+        "Budget",
+        "Constraints",
+        "NES",
+        "SNES",
+        "N64",
+        "PS1"
+      ],
+      "systems": [
+        "systems.retro.constraints.nes",
+        "systems.retro.constraints.snes",
+        "systems.retro.constraints.n64",
+        "systems.retro.constraints.ps1",
+        "systems.knowledgegraph.core"
+      ],
+      "schemas": [
+        "schemas/nesconstraints.schema.json",
+        "schemas/n64constraints.schema.json",
+        "schemas/budgetprofile.schema.json"
+      ],
+      "examples": [
+        "examples/budgets/nes_nrom128_profile.json",
+        "examples/budgets/n64_single_level_profile.json",
+        "examples/budgets/ps1_two_disc_campaign_profile.json"
+      ]
+    },
+    {
+      "id": "nintendoor64.schema_designer",
+      "title": "Schema-First Designer",
+      "description": "Schema-first designer that treats every AI-visible structure (recipes, constraints, stealth params, narrative graphs, ArtifactSpecs, SystemNodes) as a Rust type plus JSON Schema, with generators and validators wired into CI so AI-Chat always designs against live contracts.",
+      "tags": [
+        "Nintendoor64",
+        "Schemas",
+        "Sonia",
+        "Contracts",
+        "CI",
+        "KnowledgeGraph"
+      ],
+      "systems": [
+        "systems.schemas.generator",
+        "systems.schemas.validator",
+        "systems.nintendoor64.sonia",
+        "systems.knowledgegraph.core"
+      ],
+      "schemas": [
+        "schemas/systemnode.schema.json",
+        "schemas/artifactspec.schema.json",
+        "schemas/gamerecipe.schema.json",
+        "schemas/stealthparams.schema.json",
+        "schemas/narrativegraph.schema.json"
+      ],
+      "examples": [
+        "schemas/generated/index.json",
+        "examples/schemas/full_config_validation_suite.json",
+        "knowledgegraph/systems.json"
+      ]
+    }
+  ]
+}
