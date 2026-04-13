@@ -1,10 +1,11 @@
 // crates/n64-constraints/src/lib.rs
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// High-level target cartridge profiles for N64.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum N64CartProfile {
     /// 16 MiB cartridge (128 Mbit).
@@ -18,7 +19,7 @@ pub enum N64CartProfile {
 }
 
 /// RDRAM availability profile (base vs Expansion Pak).
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum N64RamProfile {
     /// 4 MiB base RDRAM.
@@ -30,7 +31,7 @@ pub enum N64RamProfile {
 }
 
 /// Texture pixel format for RDP costing and budgeting.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Eq, PartialEq, Hash, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum N64TextureFormat {
     Rgba16,
@@ -43,27 +44,8 @@ pub enum N64TextureFormat {
     Ci8,
 }
 
-/// Simple helper for bytes-per-pixel approximation for budget math.
-///
-/// These are approximate effective storage costs for uncompressed texture data.
-/// Compressed or tiled layouts can be handled at the asset-pipeline level.
-impl N64TextureFormat {
-    pub fn bytes_per_pixel(self) -> f32 {
-        match self {
-            N64TextureFormat::Rgba16 => 2.0,
-            N64TextureFormat::Rgba32 => 4.0,
-            N64TextureFormat::Ia4 => 0.5,
-            N64TextureFormat::Ia8 => 1.0,
-            N64TextureFormat::I4 => 0.5,
-            N64TextureFormat::I8 => 1.0,
-            N64TextureFormat::Ci4 => 0.5,
-            N64TextureFormat::Ci8 => 1.0,
-        }
-    }
-}
-
 /// Constraints for the overall N64 target (ROM + RAM + CPU).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct N64Constraints {
     /// Cartridge profile.
@@ -95,6 +77,25 @@ pub struct N64Constraints {
     /// Optional per-segment ROM budget (segment name -> bytes).
     #[serde(default)]
     pub segment_rom_budgets: HashMap<String, u32>,
+}
+
+/// Simple helper for bytes-per-pixel approximation for budget math.
+///
+/// These are approximate effective storage costs for uncompressed texture data.
+/// Compressed or tiled layouts can be handled at the asset-pipeline level.
+impl N64TextureFormat {
+    pub fn bytes_per_pixel(self) -> f32 {
+        match self {
+            N64TextureFormat::Rgba16 => 2.0,
+            N64TextureFormat::Rgba32 => 4.0,
+            N64TextureFormat::Ia4 => 0.5,
+            N64TextureFormat::Ia8 => 1.0,
+            N64TextureFormat::I4 => 0.5,
+            N64TextureFormat::I8 => 1.0,
+            N64TextureFormat::Ci4 => 0.5,
+            N64TextureFormat::Ci8 => 1.0,
+        }
+    }
 }
 
 /// Reasonable defaults for a 32 MiB cart, 8 MiB RAM, 30 FPS target.
@@ -194,7 +195,7 @@ impl N64Constraints {
 }
 
 /// High-level asset class for budgeting. Starzip can tag each file.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Eq, PartialEq, Hash, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum N64AssetClass {
     Code,
@@ -206,7 +207,7 @@ pub enum N64AssetClass {
 }
 
 /// A single asset entry in the manifest used for budget analysis.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct N64AssetEntry {
     /// Logical identifier or path for this asset.
@@ -226,7 +227,7 @@ pub struct N64AssetEntry {
 }
 
 /// Manifest of all assets in a build, for budget analysis.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct N64AssetManifest {
     /// Optional identifier for this build or recipe.
@@ -237,7 +238,7 @@ pub struct N64AssetManifest {
 }
 
 /// Per-asset-class usage summary.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ClassUsage {
     pub used_bytes: u32,
@@ -246,7 +247,7 @@ pub struct ClassUsage {
 }
 
 /// Per-segment ROM usage summary.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct SegmentUsage {
     pub used_bytes: u32,
@@ -255,7 +256,7 @@ pub struct SegmentUsage {
 }
 
 /// Top-level budget report emitted by starzip-cli.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct BudgetReport {
     /// Optional build/recipe identifier.
@@ -349,9 +350,7 @@ pub fn analyze_budget(
         cpu_used = cpu_used.saturating_add(asset.cpu_cycles_per_frame);
 
         // Class usage.
-        let entry = class_usage
-            .entry(asset.class)
-            .or_insert((0u64, 0u32));
+        let entry = class_usage.entry(asset.class).or_insert((0u64, 0u32));
         entry.0 = entry.0.saturating_add(asset.size_bytes as u64);
 
         // Segment usage.
@@ -368,8 +367,7 @@ pub fn analyze_budget(
     let runtime_budget = constraints.runtime_free_bytes();
     let runtime_over = runtime_used as i64 - runtime_budget as i64;
 
-    let cpu_over =
-        cpu_used as i64 - constraints.cpu_cycles_per_frame as i64;
+    let cpu_over = cpu_used as i64 - constraints.cpu_cycles_per_frame as i64;
 
     // Materialize class usage summaries.
     let mut class_usage_out: HashMap<N64AssetClass, ClassUsage> = HashMap::new();
