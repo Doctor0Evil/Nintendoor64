@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gamemode.ai/schemas/sonia-command-descriptor.schema.json",
+  "title": "SoniaCommandDescriptor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "paramsSchema",
+    "resultSchema",
+    "platforms",
+    "artifactKinds",
+    "invariantsTouched"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Logical command identifier (e.g. validate, write, list, get-session, update-session)."
+    },
+    "paramsSchema": {
+      "type": "string",
+      "description": "Path or URI to the JSON Schema used for this command's params payload."
+    },
+    "resultSchema": {
+      "type": "string",
+      "description": "Path or URI to the JSON Schema describing the result payload.",
+      "default": ""
+    },
+    "platforms": {
+      "type": "array",
+      "description": "Set of platform affinities for this command.",
+      "items": {
+        "type": "string",
+        "enum": ["NES", "SNES", "N64", "PS1", "Multi"]
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "artifactKinds": {
+      "type": "array",
+      "description": "Set of artifact kinds this command may touch.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "N64RomPatch",
+          "Ps1IsoPatch",
+          "LuaScript",
+          "InputMapperConfig",
+          "ScenarioSpec",
+          "NarrativeGraph",
+          "Other"
+        ]
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "invariantsTouched": {
+      "type": "array",
+      "description": "Zero or more logical invariant IDs this command may affect or rely on.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    }
+  }
+}
