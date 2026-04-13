@@ -46,6 +46,15 @@ max_supported_version = { type = "string", description = "Maximum protocol versi
 algorithm = "interval_overlap"
 fallback_on_mismatch = "VersionMismatch"
 
+# ✅ First method: separate table entry
+[[methods]]
+id = "sonia.apply-diff"
+cli = "apply-diff"
+stdin_schema = "schemas/sonia.apply-diff.request.schema.json"
+stdout_schema = "schemas/sonia.apply-diff.result.schema.json"
+non_interactive = true
+
+# ✅ Second method: new table entry (array element)
 [[methods]]
 id = "gamemodeai-rust.run-cargo"
 cli = "gamemodeai-rust-cli"
