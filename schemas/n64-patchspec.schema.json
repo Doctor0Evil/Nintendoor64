@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "N64 PatchSpec",
+  "type": "object",
+  "required": ["version", "baseRomId", "layoutId", "edits"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "baseRomId": { "type": "string" },
+    "layoutId": { "type": "string" },
+    "edits": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["kind", "logicalPath", "payloadRef", "encoding"],
+            "properties": {
+              "kind": { "const": "replaceFile" },
+              "logicalPath": { "type": "string" },
+              "payloadRef": { "type": "string" },
+              "encoding": { "enum": ["Text", "Hex", "Base64"] }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": ["kind", "hookKind", "romOffset", "payloadRef", "encoding"],
+            "properties": {
+              "kind": { "const": "bootHook" },
+              "hookKind": { "type": "string" },
+              "romOffset": { "type": "integer", "minimum": 0 },
+              "payloadRef": { "type": "string" },
+              "encoding": { "enum": ["Text", "Hex", "Base64"] }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": ["kind", "logicalPath", "jsonPointer", "value"],
+            "properties": {
+              "kind": { "const": "jsonPatch" },
+              "logicalPath": { "type": "string" },
+              "jsonPointer": { "type": "string" },
+              "value": {}
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": ["kind", "romOffset", "maxBytes", "payloadRef", "encoding"],
+            "properties": {
+              "kind": { "const": "rawIntervalPatch" },
+              "romOffset": { "type": "integer", "minimum": 0 },
+              "maxBytes": { "type": "integer", "minimum": 0 },
+              "payloadRef": { "type": "string" },
+              "encoding": { "enum": ["Text", "Hex", "Base64"] }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "sourceFilePath": { "type": "string" }
+  },
+  "additionalProperties": false
+}
