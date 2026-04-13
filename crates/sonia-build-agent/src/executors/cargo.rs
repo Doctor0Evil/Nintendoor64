@@ -1,13 +1,8 @@
-// Nintendoor64/crates/sonia-build-agent/src/executors/cargo.rs
+// crates/sonia-build-agent/src/executors/cargo.rs
+//! Structured wrapper around `cargo --message-format=json`.
+//! Emits typed diagnostics and artifacts instead of raw stdout/stderr.
 
-//! Executes `cargo` commands with `--message-format=json` and converts them into structured
-//! `BuildEvent` streams for AI-orchestrated build pipelines.
-//!
-//! AI-Chat Exclusive Feature: **Structured Diagnostic Streaming**
-//! Raw `stderr`/`stdout` is never exposed to AI. Only typed `Diagnostic`, `Artifact`,
-//! and `Success/Failure` events are returned, enabling precise self-correction loops.
-
-use super::super::{BuildEvent, BuildIntent};
+use crate::{BuildEvent, BuildIntent};
 use serde::Deserialize;
 use std::process::Stdio;
 use std::time::Instant;
@@ -15,7 +10,6 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 use tracing::{error, info, warn};
 
-/// Top‑level message envelope for `cargo --message-format=json*`.
 #[derive(Debug, Deserialize)]
 struct CargoMessage {
     reason: String,
@@ -23,7 +17,6 @@ struct CargoMessage {
     data: serde_json::Value,
 }
 
-/// Subset of `compiler-message` payload that we care about.
 #[derive(Debug, Deserialize)]
 struct CompilerMessage {
     message: CompilerInner,
@@ -33,39 +26,47 @@ struct CompilerMessage {
 struct CompilerInner {
     rendered: String,
     level: String,
-    // We keep the raw code payload to attach into diagnostics metadata if needed.
     code: Option<serde_json::Value>,
-    // Children carry additional spans/notes; we ignore them for the AI surface for now.
     children: Vec<CompilerInner>,
 }
 
-/// High‑level cargo pipeline for a `BuildIntent`.
-///
-/// This function:
-/// - Constructs a `cargo check` command using `intent.params`.
-/// - Streams JSON messages from `stdout`.
-/// - Emits structured `BuildEvent::Diagnostic` and `BuildEvent::Success/Failure` events.
 pub async fn run_cargo_pipeline(intent: &BuildIntent) {
     let intent_id = intent.id.clone();
     let start = Instant::now();
-    let mut diagnostics: Vec<serde_json::Value> = Vec::new();
-    let mut artifacts: Vec<String> = Vec::new();
+    let mut diagnostics = Vec::new();
+    let mut artifacts = Vec::new();
 
-    info!(%intent_id, "Starting cargo pipeline");
+    info!(%intent_id, "starting cargo pipeline");
 
     let mut cmd = Command::new("cargo");
-    cmd.arg("check")
-        // Use JSON with rendered diagnostics so we can feed the LLM with human‑oriented text
-        // without exposing raw terminal escape sequences.
-        .arg("--message-format=json-render-diagnostics")
+    let profile = intent
+        .params
+        .get("profile")
+        .and_then(|v| v.as_str())
+        .unwrap_or("check");
+
+    match profile {
+        "release" => {
+            cmd.arg("build");
+            cmd.arg("--release");
+        }
+        "dev" => {
+            cmd.arg("build");
+        }
+        "check" | _ => {
+            cmd.arg("check");
+        }
+    }
+
+    cmd.arg("--message-format=json-rendered-diagnostics")
         .arg("--quiet")
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
 
-    // Extract crate & features from params
     if let Some(crate_name) = intent.params.get("crate_name").and_then(|v| v.as_str()) {
         cmd.arg("-p").arg(crate_name);
     }
+
     if let Some(features) = intent.params.get("features").and_then(|v| v.as_array()) {
         for f in features {
             if let Some(s) = f.as_str() {
@@ -78,12 +79,12 @@ pub async fn run_cargo_pipeline(intent: &BuildIntent) {
         Ok(c) => c,
         Err(e) => {
             let evt = BuildEvent::Failure {
-                intent_id: intent_id.clone(),
-                reason: e.to_string(),
+                intent_id,
+                reason: format!("failed to spawn cargo: {}", e),
                 diagnostics,
             };
-            error!(?evt, "Failed to spawn cargo process");
-            // In a fuller pipeline you may want to emit `evt` into a channel here.
+            error!(?evt, "cargo spawn failed");
+            // TODO: forward evt
             return;
         }
     };
@@ -92,11 +93,12 @@ pub async fn run_cargo_pipeline(intent: &BuildIntent) {
         Some(s) => s,
         None => {
             let evt = BuildEvent::Failure {
-                intent_id: intent_id.clone(),
-                reason: "Failed to capture cargo stdout".to_string(),
+                intent_id,
+                reason: "no stdout from cargo".to_string(),
                 diagnostics,
             };
-            error!(?evt, "Cargo stdout not piped");
+            error!(?evt, "cargo stdout missing");
+            // TODO: forward evt
             return;
         }
     };
@@ -107,52 +109,46 @@ pub async fn run_cargo_pipeline(intent: &BuildIntent) {
         if line.trim().is_empty() {
             continue;
         }
-
         match serde_json::from_str::<CargoMessage>(&line) {
             Ok(msg) => match msg.reason.as_str() {
                 "compiler-message" => {
-                    // Persist raw JSON payload for downstream consumers.
-                    diagnostics.push(msg.data.clone());
-
                     if let Ok(cm) = serde_json::from_value::<CompilerMessage>(msg.data.clone()) {
-                        let level = cm.message.level.clone();
-                        let rendered = cm.message.rendered.trim().to_string();
-
-                        // In future we can parse spans for file/line/column; for now we keep them
-                        // as "unknown" to maintain the invariant that AI never sees raw paths
-                        // unless explicitly allowed via higher-level contracts.
+                        diagnostics.push(msg.data.clone());
                         let evt = BuildEvent::Diagnostic {
                             intent_id: intent_id.clone(),
-                            file: "unknown".to_string(),
+                            file: "unknown".to_string(), // TODO: parse spans
                             line: 0,
                             column: 0,
-                            level,
-                            message: rendered,
+                            level: cm.message.level.clone(),
+                            message: cm.message.rendered.trim().to_string(),
                             suggestion: None,
                         };
-
-                        info!(?evt, "Diagnostic streamed");
-                        // In a streaming design, this would be sent over a channel.
+                        info!(?evt, "diagnostic");
+                        // TODO: forward evt
                     }
                 }
                 "compiler-artifact" => {
-                    if let Some(paths) = msg.data.get("filenames") {
-                        if let Some(arr) = paths.as_array() {
+                    if let Some(filenames) = msg.data.get("filenames") {
+                        if let Some(arr) = filenames.as_array() {
                             for p in arr {
                                 if let Some(s) = p.as_str() {
                                     artifacts.push(s.to_string());
+                                    let evt = BuildEvent::ArtifactEmitted {
+                                        intent_id: intent_id.clone(),
+                                        path: s.to_string(),
+                                        artifact_type: "binary".to_string(),
+                                    };
+                                    info!(?evt, "artifact emitted");
+                                    // TODO: forward evt
                                 }
                             }
                         }
                     }
                 }
-                _ => {
-                    // Ignore other message reasons (build-script-executed, build-finished, etc.)
-                }
+                _ => {}
             },
             Err(e) => {
-                // Keep this logged but non-fatal; `cargo` sometimes prints non-JSON lines.
-                warn!(%e, %line, "Failed to parse cargo JSON message");
+                warn!(error = %e, line = %line, "failed to parse cargo JSON message");
             }
         }
     }
@@ -161,11 +157,12 @@ pub async fn run_cargo_pipeline(intent: &BuildIntent) {
         Ok(s) => s,
         Err(e) => {
             let evt = BuildEvent::Failure {
-                intent_id: intent_id.clone(),
-                reason: format!("Failed to wait for cargo process: {e}"),
+                intent_id,
+                reason: format!("failed to wait on cargo: {}", e),
                 diagnostics,
             };
-            error!(?evt, "Cargo pipeline wait error");
+            error!(?evt, "cargo wait failed");
+            // TODO: forward evt
             return;
         }
     };
@@ -178,22 +175,33 @@ pub async fn run_cargo_pipeline(intent: &BuildIntent) {
             artifacts,
             duration_ms: duration,
         };
-        info!(?evt, "Cargo pipeline completed successfully");
-        // Emit evt to your event sink here.
+        info!(?evt, "cargo pipeline completed successfully");
+        // TODO: forward evt
     } else {
         let evt = BuildEvent::Failure {
             intent_id,
-            reason: "Compilation failed".to_string(),
+            reason: "compilation failed".to_string(),
             diagnostics,
         };
-        error!(?evt, "Cargo pipeline failed");
-        // Emit evt to your event sink here.
+        error!(?evt, "cargo pipeline failed");
+        // TODO: forward evt
     }
 }
 
-/// Stub entry point for schema generation / codegen crates that live alongside build.
-/// In production this would delegate into a dedicated crate (e.g. `n64-ai-gen-schemas`).
 pub async fn run_generate_schemas(intent: &BuildIntent) {
-    info!(id = %intent.id, "Schema generation triggered (stub)");
-    // Intentionally no-op for now; wiring to real schema-gen crate is handled elsewhere.
+    let intent_id = intent.id.clone();
+    info!(%intent_id, "schema generation triggered (stub)");
+
+    // This should eventually shell out to your existing schema-gen CLI
+    // (e.g. tools/schema-gen) under fixed args, or call into a Rust API
+    // that generates ArtifactSpec / RomLayout / SessionProfile schemas
+    // into the `schemas/` directory.
+
+    let evt = BuildEvent::Success {
+        intent_id,
+        artifacts: vec!["schemas/".to_string()],
+        duration_ms: 0,
+    };
+    info!(?evt, "generate_schemas stub completed");
+    // TODO: forward evt
 }
