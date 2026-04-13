@@ -1,0 +1,77 @@
+# Nintendoor64/.github/workflows/schema-gen-ci.yml
+# CI workflow: validate schema generation and contract stability
+
+name: Schema Generation & Contract Validation
+
+on:
+  push:
+    paths:
+      - 'crates/**/src/**/*.rs'
+      - 'crates/n64-ai-gen-schemas/**'
+      - 'schemas/**'
+  pull_request:
+    paths:
+      - 'crates/**/src/**/*.rs'
+      - 'crates/n64-ai-gen-schemas/**'
+      - 'schemas/**'
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  generate-and-validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust: [stable, nightly]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: rustfmt, clippy
+
+      - name: Cache Cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
+      - name: Build schema generator
+        run: cargo build -p n64-ai-gen-schemas --features full
+
+      - name: Run schema generation
+        run: cargo run -p n64-ai-gen-schemas --features full -- --output ./schemas-generated
+
+      - name: Validate generated schemas against meta-schema
+        run: |
+          for schema in ./schemas-generated/*.schema.json; do
+            echo "Validating $schema"
+            npx ajv-cli validate -s ./schemas/meta-schema.json -d "$schema" || exit 1
+          done
+
+      - name: Check for breaking schema changes
+        if: github.event_name == 'pull_request'
+        run: |
+          # Compare generated schemas against baseline
+          if [ -d "./schemas" ] && [ -d "./schemas-generated" ]; then
+            cargo run -p n64-ai-gen-schemas --features full -- --output ./schemas-compare
+            # Simple diff check: fail if any required field was removed
+            python3 ci/check-schema-diff.py ./schemas ./schemas-compare || exit 1
+          fi
+
+      - name: Upload generated schemas as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-schemas-${{ matrix.rust }}
+          path: ./schemas-generated/
+          retention-days: 7
+
+      - name: Run clippy on schema crate
+        run: cargo clippy -p n64-ai-gen-schemas --features full -- -D warnings
+
+      - name: Run tests
+        run: cargo test -p n64-ai-gen-schemas --features full
