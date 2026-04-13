@@ -1,0 +1,40 @@
+name: schema-review
+on:
+  pull_request:
+    paths:
+      - 'schemas/**/*.schema.json'
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Build schema-diff
+        run: cargo build -p schema-diff
+      - name: Generate PR diff comment
+        id: gen
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD 'schemas/**/*.schema.json')
+          BODY=""
+          for F in $CHANGED; do
+            OLD=".schema-review/base/$F"
+            mkdir -p "$(dirname "$OLD")"
+            git show "origin/${{ github.base_ref }}:$F" > "$OLD" || true
+            OUT=$(cargo run -p schema-diff -- --old "$OLD" --new "$F")
+            BODY="$BODY"$'\n\n'"$OUT"
+          done
+          BODY="${BODY:-'No schema changes detected.'}"
+          jq -n --arg body "$BODY" '{body:$body}' > body.json
+      - name: Post comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -s -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d @body.json \
+            "${{ github.api_url }}/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
