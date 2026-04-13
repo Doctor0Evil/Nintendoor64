@@ -1,0 +1,6 @@
+{
+  "kind": "N64RomPatch",
+  "filename": "artifacts/patches/n64/test-title-screen.bin",
+  "encoding": "Base64",
+  "content": "VGVzdFRpdGxlU2NyZWVuUGF5bG9hZEJ5dGVzAA=="
+}
