@@ -1,0 +1,42 @@
+{
+  "tools": [
+    {
+      "name": "cargo_build",
+      "description": "Compile a crate with specified features. Returns structured diagnostics and artifact paths.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "crate_name": {"type": "string"},
+          "features": {"type": "array", "items": {"type": "string"}},
+          "profile": {"type": "string", "enum": ["dev", "release", "check"]},
+          "timeout_ms": {"type": "integer", "default": 60000}
+        },
+        "required": ["crate_name"]
+      }
+    },
+    {
+      "name": "generate_schemas",
+      "description": "Trigger schema generation via n64-ai-gen-schemas. Returns list of emitted .schema.json files.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "watch_mode": {"type": "boolean", "default": false},
+          "output_dir": {"type": "string", "default": "schemas"},
+          "include_registry": {"type": "boolean", "default": true}
+        }
+      }
+    },
+    {
+      "name": "query_lsp_diagnostics",
+      "description": "Fetch rust-analyzer diagnostics for a file without full compilation.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file_path": {"type": "string"},
+          "severity_filter": {"type": "array", "items": {"type": "string"}}
+        },
+        "required": ["file_path"]
+      }
+    }
+  ]
+}
