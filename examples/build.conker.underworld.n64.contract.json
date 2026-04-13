@@ -1,0 +1,62 @@
+{
+  "id": "gm.build.conker.underworld.n64.v1",
+  "version": "1.0.0",
+  "target": "n64",
+  "profile": "debug",
+  "workspace_root": ".",
+  "inputs": {
+    "recipe": "recipes/conker_underworld_arena.recipe.json",
+    "layout": "layouts/conker_base.layout.json",
+    "artifact_root": "artifacts",
+    "build_root": "build"
+  },
+  "steps": [
+    {
+      "id": "step.retro.assets",
+      "kind": "retro",
+      "tool": "retro-cli",
+      "args": ["build-from-recipe", "--target", "n64"],
+      "inputs": {
+        "recipe": "recipes/conker_underworld_arena.recipe.json"
+      },
+      "outputs": {
+        "assets_dir": "build/conker_underworld/assets"
+      },
+      "depends_on": []
+    },
+    {
+      "id": "step.n64.build",
+      "kind": "n64",
+      "tool": "n64-build",
+      "args": [],
+      "inputs": {
+        "recipe": "recipes/conker_underworld_arena.recipe.json"
+      },
+      "outputs": {
+        "rom": "build/conker_underworld/dev_base.z64",
+        "logs_dir": "build/conker_underworld/logs"
+      },
+      "depends_on": ["step.retro.assets"]
+    },
+    {
+      "id": "step.n64.starzip.patch",
+      "kind": "starzip",
+      "tool": "starzip-cli",
+      "args": [],
+      "inputs": {
+        "patch_spec": "artifacts/patches/conker_underworld_main.patch.json"
+      },
+      "outputs": {
+        "rom": "build/conker_underworld/game.z64"
+      },
+      "depends_on": ["step.n64.build"]
+    }
+  ],
+  "outputs": {
+    "rom": "build/conker_underworld/game.z64",
+    "artifact_manifest": "build/conker_underworld/manifest.json"
+  },
+  "metadata": {
+    "notes": "First-pass N64 build path for Conker Underworld arena slice."
+  }
+}
