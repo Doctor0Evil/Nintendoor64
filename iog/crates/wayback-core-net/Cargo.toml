@@ -1,0 +1,10 @@
+[package]
+name = "wayback-core-net"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { workspace = true, features = ["full"] }
+tun = "0.6"
+anyhow = { workspace = true }
+tracing = { workspace = true }
