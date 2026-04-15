@@ -1,0 +1,19 @@
+[package]
+name = "wayback-proxy"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { workspace = true, features = ["full"] }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = "0.3"
+serde = { workspace = true }
+serde_json = { workspace = true }
+schemars = { workspace = true }
+
+wayback-core-net = { path = "../wayback-core-net" }
+wayback-dns = { path = "../wayback-dns" }
+wayback-dht = { path = "../wayback-dht" }
+wayback-scripting = { path = "../wayback-scripting" }
+iog-protocol-model = { path = "../iog-protocol-model" }
