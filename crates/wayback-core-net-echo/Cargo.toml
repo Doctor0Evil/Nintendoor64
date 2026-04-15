@@ -1,0 +1,10 @@
+# crates/wayback-core-net-echo/Cargo.toml
+
+[package]
+name = "wayback-core-net-echo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+wayback-core-net = { path = "../wayback-core-net" }
