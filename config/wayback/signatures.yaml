@@ -1,0 +1,60 @@
+# config/wayback/signatures.yaml
+#
+# Signature definitions for wayback-detect.
+# These are intentionally small and human-editable; AI-chat can
+# extend this file with new engines and patterns.
+
+version: 1
+signatures:
+  # GameSpy heartbeat example (UDP payload contains \heartbeat\ and \gamename\).
+  - id: "gamespy-heartbeat"
+    engine: "GameSpy"
+    protocol: "udp"
+    priority: 100
+    kind: "substring"
+    offset: 0
+    pattern: "\\heartbeat\\"
+    tags: ["gamespy", "master", "heartbeat"]
+
+  # GameSpy server query/status packets often include \basic\ and \final\.
+  - id: "gamespy-basic-status"
+    engine: "GameSpy"
+    protocol: "udp"
+    priority: 90
+    kind: "substring"
+    offset: 0
+    pattern: "\\basic\\"
+    tags: ["gamespy", "status", "query"]
+
+  # Simple example for an IPX-over-UDP tunnel per RFC 1234:
+  # first two octets of the inner IPX header are 0xFF 0xFF.[web:71]
+  - id: "ipx-over-udp"
+    engine: "IPX"
+    protocol: "udp"
+    priority: 80
+    kind: "prefix-bytes"
+    offset: 0
+    hex: "ffff"
+    tags: ["ipx", "tunnel", "rfc1234"]
+
+  # Example IP-based engine: Quake 3 challenge string.
+  - id: "quake3-challenge"
+    engine: "Quake3"
+    protocol: "udp"
+    priority: 70
+    kind: "prefix-bytes"
+    offset: 0
+    # \xFF\xFF\xFF\xFFgetchallenge
+    hex: "ffffffff6765746368616c6c656e6765"
+    tags: ["quake3", "challenge", "idtech"]
+
+  # GoldSrc server query uses 0xFF 0xFF 0xFF 0xFF 'T' as a prefix.
+  - id: "goldsrc-challenge"
+    engine: "GoldSrc"
+    protocol: "udp"
+    priority: 70
+    kind: "prefix-bytes"
+    offset: 0
+    # \xFF\xFF\xFF\xFFT
+    hex: "ffffffff54"
+    tags: ["goldsrc", "challenge", "valve"]
