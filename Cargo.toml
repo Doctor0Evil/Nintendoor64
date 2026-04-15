@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    # existing members...
+    "crates/wayback-core-net",
+    "crates/wayback-core-net-echo",
+]
