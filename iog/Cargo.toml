@@ -1,0 +1,21 @@
+[workspace]
+members = [
+    "crates/wayback-core-net",
+    "crates/wayback-dns",
+    "crates/wayback-dht",
+    "crates/wayback-webrtc-bridge",
+    "crates/wayback-scripting",
+    "crates/wayback-proxy",
+    "crates/wayback-llm",
+    "crates/iog-protocol-model",
+]
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+schemars = "0.8"
+thiserror = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+anyhow = "1"
