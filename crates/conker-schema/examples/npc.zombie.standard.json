@@ -1,0 +1,116 @@
+{
+  "id": "npc.zombie.standard",
+  "title": "Standard Graveyard Zombie",
+  "kind": "ZOMBIE",
+  "damageable": {
+    "maxHp": 9999.0,
+    "killTags": [
+      "headshot.shotgun",
+      "headshot.rifle"
+    ],
+    "ignoreTags": [
+      "pistol.bodyshot",
+      "rifle.bodyshot",
+      "melee.light"
+    ],
+    "damageMultipliers": {
+      "explosive.generic": 0.0
+    }
+  },
+  "movement": {
+    "mode": "GROUND_CHASE",
+    "navgraphRef": "navgraph.spooky.graveyard.ground",
+    "maxSpeed": 1.6,
+    "preferredNavTags": [
+      "ground",
+      "graveyard"
+    ]
+  },
+  "behavior": {
+    "states": [
+      {
+        "id": "Idle",
+        "asid": "ASID_ZOMBIE_IDLE",
+        "actions": [
+          {
+            "actionId": "action.zombie.idle_moan",
+            "weight": 3
+          },
+          {
+            "actionId": "action.zombie.idle_shuffle",
+            "weight": 1
+          }
+        ],
+        "transitions": [
+          {
+            "conditionId": "condition.sees_target",
+            "nextState": "ShambleChase"
+          }
+        ]
+      },
+      {
+        "id": "ShambleChase",
+        "asid": "ASID_ZOMBIE_SHAMBLE",
+        "actions": [
+          {
+            "actionId": "action.zombie.shuffle_forward",
+            "weight": 4
+          },
+          {
+            "actionId": "action.zombie.reach_out",
+            "weight": 1
+          }
+        ],
+        "transitions": [
+          {
+            "conditionId": "condition.target_within_melee",
+            "nextState": "GrabAttack"
+          },
+          {
+            "conditionId": "condition.lost_target",
+            "nextState": "Idle"
+          }
+        ]
+      },
+      {
+        "id": "GrabAttack",
+        "asid": "ASID_ZOMBIE_GRAB",
+        "actions": [
+          {
+            "actionId": "action.zombie.grab_and_bite",
+            "weight": 1
+          }
+        ],
+        "transitions": [
+          {
+            "conditionId": "condition.attack_resolved",
+            "nextState": "ShambleChase"
+          },
+          {
+            "conditionId": "condition.lost_target",
+            "nextState": "Idle"
+          }
+        ]
+      }
+    ],
+    "initialState": "Idle"
+  },
+  "spawn": {
+    "maxConcurrent": 8,
+    "spawnDensity": 2.0,
+    "allowedZones": [
+      "zone.spooky.graveyard_outer",
+      "zone.spooky.graveyard_inner"
+    ],
+    "activationConditions": [
+      {
+        "conditionId": "objective.active.spooky_chapter",
+        "description": "Only active during the Spooky / graveyard sequence."
+      }
+    ],
+    "respawn": {
+      "enabled": true,
+      "cooldownSeconds": 5.0
+    }
+  }
+}
