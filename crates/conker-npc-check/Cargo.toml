@@ -1,0 +1,17 @@
+[package]
+name = "conker-npc-check"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+walkdir = "2.5"
+thiserror = "1.0"
+
+# Use the shared schemas / types from the repo.
+conker-schema = { path = "../conker-schema" }
+
+# Optional: if you want JSON Schema validation as well as Rust deserialization.
+jsonschema = "0.18"
