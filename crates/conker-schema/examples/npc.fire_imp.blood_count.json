@@ -1,0 +1,111 @@
+{
+  "id": "npc.fire_imp.blood_count",
+  "title": "Blood Count Fire Imp",
+  "kind": "FIRE_IMP",
+  "damageable": {
+    "maxHp": 120.0,
+    "killTags": [
+      "water_spray",
+      "urination_stream",
+      "instant_hazard.douse"
+    ],
+    "ignoreTags": [
+      "pistol.bodyshot",
+      "rifle.bodyshot",
+      "melee.light"
+    ],
+    "damageMultipliers": {}
+  },
+  "movement": {
+    "mode": "GROUND_CHASE",
+    "navgraphRef": "navgraph.blood_count.keep_interior",
+    "maxSpeed": 3.2,
+    "preferredNavTags": [
+      "ground",
+      "corridor"
+    ]
+  },
+  "behavior": {
+    "states": [
+      {
+        "id": "Dormant",
+        "asid": "ASID_FIRE_IMP_DORMANT",
+        "actions": [
+          {
+            "actionId": "action.fire_imp.idle_cackle",
+            "weight": 1
+          }
+        ],
+        "transitions": [
+          {
+            "conditionId": "condition.blood_vial_carrier_present",
+            "nextState": "ChaseCarrier"
+          }
+        ]
+      },
+      {
+        "id": "ChaseCarrier",
+        "asid": "ASID_FIRE_IMP_CHASE",
+        "actions": [
+          {
+            "actionId": "action.fire_imp.chase_carrier",
+            "weight": 4
+          },
+          {
+            "actionId": "action.fire_imp.taunt",
+            "weight": 1
+          }
+        ],
+        "transitions": [
+          {
+            "conditionId": "condition.within_burn_range",
+            "nextState": "IgniteAttack"
+          },
+          {
+            "conditionId": "condition.no_blood_vial_carrier",
+            "nextState": "Dormant"
+          }
+        ]
+      },
+      {
+        "id": "IgniteAttack",
+        "asid": "ASID_FIRE_IMP_IGNITE",
+        "actions": [
+          {
+            "actionId": "action.fire_imp.ignite_carrier",
+            "weight": 1
+          }
+        ],
+        "transitions": [
+          {
+            "conditionId": "condition.attack_resolved",
+            "nextState": "ChaseCarrier"
+          },
+          {
+            "conditionId": "condition.no_blood_vial_carrier",
+            "nextState": "Dormant"
+          }
+        ]
+      }
+    ],
+    "initialState": "Dormant"
+  },
+  "spawn": {
+    "maxConcurrent": 1,
+    "spawnDensity": 0.1,
+    "allowedZones": [
+      "zone.blood_count.courtyard",
+      "zone.blood_count.hallway_upper"
+    ],
+    "activationConditions": [
+      {
+        "conditionId": "objective.active.blood_vial_delivery",
+        "description": "Only active while a blood vial is in play."
+      }
+    ],
+    "respawn": {
+      "enabled": true,
+      "cooldownSeconds": 45.0
+    }
+  }
+}
