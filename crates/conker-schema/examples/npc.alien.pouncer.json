@@ -1,0 +1,127 @@
+{
+  "id": "npc.alien.pouncer",
+  "title": "Xeno Pouncer",
+  "kind": "ALIEN",
+  "damageable": {
+    "maxHp": 200.0,
+    "killTags": [
+      "headshot.heavy",
+      "explosive.generic"
+    ],
+    "ignoreTags": [
+      "melee.light"
+    ],
+    "damageMultipliers": {
+      "pistol.bodyshot": 0.4,
+      "rifle.bodyshot": 0.7
+    }
+  },
+  "movement": {
+    "mode": "VENT_CEILING",
+    "navgraphRef": "navgraph.alien_base.ceiling",
+    "maxSpeed": 4.5,
+    "preferredNavTags": [
+      "vent",
+      "ceiling"
+    ]
+  },
+  "behavior": {
+    "states": [
+      {
+        "id": "Stalk",
+        "asid": "ASID_ALIEN_STALK",
+        "actions": [
+          {
+            "actionId": "action.alien.ceiling_crawl",
+            "weight": 4
+          },
+          {
+            "actionId": "action.alien.idle_hiss",
+            "weight": 1
+          }
+        ],
+        "transitions": [
+          {
+            "conditionId": "condition.target_in_pounce_cone",
+            "nextState": "Pounce"
+          },
+          {
+            "conditionId": "condition.no_target_visible",
+            "nextState": "IdleCeiling"
+          }
+        ]
+      },
+      {
+        "id": "IdleCeiling",
+        "asid": "ASID_ALIEN_IDLE_CEILING",
+        "actions": [
+          {
+            "actionId": "action.alien.idle_hang",
+            "weight": 3
+          },
+          {
+            "actionId": "action.alien.ceiling_reposition",
+            "weight": 1
+          }
+        ],
+        "transitions": [
+          {
+            "conditionId": "condition.sees_target",
+            "nextState": "Stalk"
+          }
+        ]
+      },
+      {
+        "id": "Pounce",
+        "asid": "ASID_ALIEN_POUNCE_EXECUTION",
+        "actions": [
+          {
+            "actionId": "action.alien.pounce_execution",
+            "weight": 1
+          }
+        ],
+        "transitions": [
+          {
+            "conditionId": "condition.execution_resolved",
+            "nextState": "RetreatCeiling"
+          }
+        ]
+      },
+      {
+        "id": "RetreatCeiling",
+        "asid": "ASID_ALIEN_RETREAT",
+        "actions": [
+          {
+            "actionId": "action.alien.ceiling_retreat",
+            "weight": 3
+          }
+        ],
+        "transitions": [
+          {
+            "conditionId": "condition.safe_distance_reached",
+            "nextState": "IdleCeiling"
+          }
+        ]
+      }
+    ],
+    "initialState": "IdleCeiling"
+  },
+  "spawn": {
+    "maxConcurrent": 2,
+    "spawnDensity": 0.3,
+    "allowedZones": [
+      "zone.alien_base.hangar",
+      "zone.alien_base.vent_network"
+    ],
+    "activationConditions": [
+      {
+        "conditionId": "objective.active.alien_base_escape",
+        "description": "Aliens only spawn while the escape objective is active."
+      }
+    ],
+    "respawn": {
+      "enabled": true,
+      "cooldownSeconds": 20.0
+    }
+  }
+}
