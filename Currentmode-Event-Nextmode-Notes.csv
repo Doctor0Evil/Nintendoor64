@@ -1,0 +1,7 @@
+"Current mode","Event","Next mode","Notes"
+"ExploreLayouts","CI reports hard failure (any Error)","FixOnly","Enter repair posture when budgets, determinism, schemas, or tests fail.here-is-a-coordinated-20-file-SyM6T3bzSyS8s0asiNlRMQ.md"
+"ExploreLayouts","User explicitly requests experimental","Experimental","Allowed only if session invariants permit nondeterministic experiments.here-is-a-coordinated-20-file-SyM6T3bzSyS8s0asiNlRMQ.md"
+"FixOnly","CI all green for N consecutive runs","ExploreLayouts","Automatically relax once the project stabilizes; N is configurable.here-is-a-coordinated-20-file-SyM6T3bzSyS8s0asiNlRMQ.md"
+"FixOnly","User override with admin flag","ExploreLayouts","Manual escalation; CLI enforces appropriate permissions.here-is-a-coordinated-20-file-SyM6T3bzSyS8s0asiNlRMQ.md"
+"Experimental","CI indicates severe regressions","FixOnly","Clamp back to safety if experiments break core invariants.here-is-a-coordinated-20-file-SyM6T3bzSyS8s0asiNlRMQ.md"
+"Experimental","User disables experimental flag","ExploreLayouts","Normalization once risky changes are done.here-is-a-coordinated-20-file-SyM6T3bzSyS8s0asiNlRMQ.md"
