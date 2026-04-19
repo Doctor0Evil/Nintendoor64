@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamemode.ai/schemas/starzip-patch-preview-command.schema.json",
+  "title": "StarzipPatchPreviewCommand",
+  "type": "object",
+  "required": ["command", "baseRomId", "layoutPath", "patchPath"],
+  "additionalProperties": false,
+  "properties": {
+    "command": {
+      "type": "string",
+      "const": "PatchPreview"
+    },
+    "baseRomId": {
+      "type": "string"
+    },
+    "layoutPath": {
+      "type": "string"
+    },
+    "patchPath": {
+      "type": "string"
+    },
+    "dryRun": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, do not write any artifacts or touch disk; compute impact in-memory only."
+    },
+    "budgetOnly": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, compute budget impact without enumerating all patch edits."
+    }
+  }
+}
