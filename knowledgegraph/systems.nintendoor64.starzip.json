@@ -1,0 +1,201 @@
+[
+  {
+    "id": "systems.nintendoor64.starzip",
+    "kind": "System",
+    "repo": "Doctor0Evil/Nintendoor64",
+    "tags": [
+      "Nintendoor64",
+      "N64",
+      "ROM",
+      "PackUnpack",
+      "BootHook",
+      "CLI",
+      "Rust",
+      "BinarySafe"
+    ],
+    "paths": [
+      "crates/starzip-cli/src/lib.rs",
+      "crates/starzip-cli/src/main.rs",
+      "crates/starzip-cli/src/preview_impl.rs",
+      "crates/n64-layout/src/lib.rs",
+      "configs/nintendoor64_test.layout.json",
+      "schemas/n64-rom-layout.schema.json",
+      "schemas/n64-rom-layout-preview.schema.json",
+      "schemas/n64-patch-spec.schema.json",
+      "schemas/n64-patch-impact-preview.schema.json"
+    ],
+    "description": "Starzip: Nintendoor64 ROM layout, pack/unpack, and boot hook toolchain. Provides CLI for inspecting ROM layout, unpacking logical files, synthesizing safe patch specs, replacing assets, and injecting test patterns or controller hooks into the boot segment under BinarySafe, schema-governed contracts.",
+    "depends_on": [
+      "systems.nintendoor64.sonia",
+      "systems.nintendoor64.sonia.featurelayout"
+    ],
+    "provides": [
+      "Nintendoor64.ROM.Layout.Query",
+      "Nintendoor64.ROM.Pack",
+      "Nintendoor64.ROM.Unpack",
+      "Nintendoor64.ROM.BootHook",
+      "Nintendoor64.ROM.PatchPreview",
+      "Nintendoor64.ROM.PatchApply"
+    ]
+  },
+  {
+    "id": "systems.bondfpscore.stealth_ai",
+    "kind": "System",
+    "repo": "Doctor0Evil/Nintendoor64",
+    "tags": [
+      "BondFPSCore",
+      "Stealth",
+      "Deterministic",
+      "LuaFacing",
+      "ConfigSchema",
+      "Nintendoor64",
+      "BinarySafe"
+    ],
+    "paths": [
+      "crates/bondfpscore/src/stealth_ai.rs",
+      "crates/bondfpscore/src/stealth_config.rs",
+      "data/bondfpscore/stealth/default.json",
+      "docs/schema/bond_stealth.schema.json"
+    ],
+    "description": "Bond/Perfect Dark-style stealth AI system: deterministic perception and awareness model (vision cones, sound propagation, alert thresholds) for GoldenEye/Perfect Dark-style missions, with StealthParams tuning schema, mission event hooks, and Lua-facing configuration surfaces.",
+    "depends_on": [
+      "systems.bondfpscore.movement",
+      "systems.bondfpscore.weapons",
+      "systems.mission.objective_dag"
+    ],
+    "provides": [
+      "Nintendoor64.Artifacts.Schema.StealthParams",
+      "BondFPSCore.Stealth.Visibility",
+      "BondFPSCore.Stealth.Hearing",
+      "BondFPSCore.Stealth.Awareness",
+      "BondFPSCore.Stealth.Configurable",
+      "BondFPSCore.Stealth.MissionEvents"
+    ]
+  },
+  {
+    "id": "gm.retro.backend.nes.chrpacker",
+    "kind": "System",
+    "repo": "Doctor0Evil/GAMEMODE.ai",
+    "tags": [
+      "Retro",
+      "NES",
+      "Deterministic",
+      "AssetPack",
+      "BinarySafe"
+    ],
+    "paths": [
+      "crates/retro-nes-core/src/constraints.rs",
+      "crates/retro-nes-core/src/packer.rs",
+      "crates/retro-nes-core/src/lib.rs",
+      "schemas/nes-constraints.schema.json",
+      "schemas/nes-chr-pack.schema.json"
+    ],
+    "description": "NES CHR and nametable packer for NROM-128: packs used tiles into an 8 KiB CHR bank and builds a 1 KiB nametable under NES VRAM and palette constraints, using deterministic packing rules and schema-governed asset manifests.",
+    "depends_on": [
+      "systems.retro.recipes.core",
+      "systems.retro.constraints.nes",
+      "systems.retro.cli.build"
+    ],
+    "provides": [
+      "Retro.NES.AssetPack.CHR",
+      "Retro.NES.AssetPack.Nametable",
+      "Retro.NES.Constraints.Schema"
+    ]
+  },
+  {
+    "id": "systems.nintendoor64.sonia",
+    "kind": "System",
+    "repo": "Doctor0Evil/Nintendoor64",
+    "tags": [
+      "Nintendoor64",
+      "ArtifactSink",
+      "CLI",
+      "Rust",
+      "AIChat",
+      "BinarySafe",
+      "SchemaOwner"
+    ],
+    "paths": [
+      "crates/sonia-core/src/lib.rs",
+      "crates/sonia-core-cli/src/main.rs",
+      "schemas/artifact-spec.schema.json",
+      "schemas/session-profile.schema.json",
+      "schemas/sonia-error-envelope.schema.json"
+    ],
+    "description": "Sonia core artifact sink and schema owner. Reads JSON ArtifactSpec from stdin, decodes Text/Hex/Base64 content, writes artifacts/*, and reports structured results and error envelopes for AI chat and CI, without ever exposing raw ROM or ISO bytes.",
+    "depends_on": [],
+    "provides": [
+      "Nintendoor64.Artifacts.Write",
+      "Nintendoor64.Artifacts.Decode",
+      "Nintendoor64.Artifacts.Report",
+      "Nintendoor64.Artifacts.Schema.ArtifactSpec",
+      "Nintendoor64.Session.Schema.SessionProfile",
+      "Nintendoor64.Sonia.ErrorEnvelope"
+    ]
+  },
+  {
+    "id": "systems.nintendoor64.starzip.layout",
+    "kind": "System",
+    "repo": "Doctor0Evil/Nintendoor64",
+    "tags": [
+      "Nintendoor64",
+      "RomLayout",
+      "CLI",
+      "BinarySafe",
+      "SchemaOwner",
+      "Starzip"
+    ],
+    "paths": [
+      "crates/starzip-cli/src/main.rs",
+      "crates/starzip-cli/src/preview_impl.rs",
+      "crates/n64-layout/src/lib.rs",
+      "schemas/n64-rom-layout.schema.json",
+      "schemas/n64-rom-layout-preview.schema.json"
+    ],
+    "configSchemas": [
+      "schemas/n64-rom-layout-preview.schema.json"
+    ],
+    "description": "Starzip ROM Layout Oracle: exposes Nintendoor64 ROM segments and file entries via schema-governed, BinarySafe preview reports (n64-rom-layout-preview) so AI and CI can query structure and budgets without reading raw ROM bytes.",
+    "depends_on": [
+      "systems.nintendoor64.sonia"
+    ],
+    "provides": [
+      "Nintendoor64.ROM.Layout.Summary",
+      "Nintendoor64.ROM.Layout.Schema",
+      "Nintendoor64.ROM.Layout.Preview"
+    ]
+  },
+  {
+    "id": "systems.nintendoor64.starzip.patch",
+    "kind": "System",
+    "repo": "Doctor0Evil/Nintendoor64",
+    "tags": [
+      "Nintendoor64",
+      "PatchSynthesizer",
+      "CLI",
+      "BinarySafe",
+      "SchemaOwner",
+      "Starzip"
+    ],
+    "paths": [
+      "crates/starzip-cli/src/main.rs",
+      "crates/starzip-cli/src/preview_impl.rs",
+      "crates/n64-layout/src/lib.rs",
+      "schemas/n64-patch-spec.schema.json",
+      "schemas/n64-patch-impact-preview.schema.json"
+    ],
+    "configSchemas": [
+      "schemas/n64-patch-impact-preview.schema.json"
+    ],
+    "description": "Starzip Safe Patch Synthesizer: compiles logical Nintendoor64 patch specs into safe ROM mutations, and exposes BinarySafe patch impact preview reports (n64-patch-impact-preview) to summarize per-segment changes and budget impact without leaking underlying ROM content.",
+    "depends_on": [
+      "systems.nintendoor64.starzip.layout",
+      "systems.nintendoor64.sonia"
+    ],
+    "provides": [
+      "Nintendoor64.ROM.Patch.SpecSchema",
+      "Nintendoor64.ROM.Patch.ImpactPreview",
+      "Nintendoor64.ROM.Patch.SafeApply"
+    ]
+  }
+]
