@@ -1,0 +1,48 @@
+name: starzip-preview-validate
+
+on:
+  push:
+    paths:
+      - "crates/starzip-cli/**"
+      - "schemas/n64-rom-layout-preview.schema.json"
+      - "schemas/n64-patch-impact-preview.schema.json"
+  pull_request:
+    paths:
+      - "crates/starzip-cli/**"
+      - "schemas/n64-rom-layout-preview.schema.json"
+      - "schemas/n64-patch-impact-preview.schema.json"
+
+jobs:
+  validate-previews:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build starzip-cli
+        run: cargo build -p starzip-cli
+
+      - name: Generate sample preview outputs
+        run: |
+          # Use small test ROM and layout/patch from examples.
+          echo '{"command":"RomQuery","romId":"test-rom","layoutPath":"examples/n64/layouts/test.layout.json"}' \
+            | target/debug/starzip-cli > /tmp/rom-preview.json
+
+          echo '{"command":"PatchPreview","baseRomId":"test-rom","layoutPath":"examples/n64/layouts/test.layout.json","patchPath":"examples/n64/patches/test.patch.json"}' \
+            | target/debug/starzip-cli > /tmp/patch-preview.json
+
+      - name: Validate rom-query preview against schema
+        run: |
+          cargo run -p schema-guard -- \
+            --schema schemas/n64-rom-layout-preview.schema.json \
+            --instances /tmp/rom-preview.json
+
+      - name: Validate patch-preview against schema
+        run: |
+          cargo run -p schema-guard -- \
+            --schema schemas/n64-patch-impact-preview.schema.json \
+            --instances /tmp/patch-preview.json
