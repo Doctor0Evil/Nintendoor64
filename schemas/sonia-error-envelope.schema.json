@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamemode.ai/schemas/sonia-error-envelope.schema.json",
+  "title": "SoniaErrorEnvelope",
+  "type": "object",
+  "required": ["ok", "errorCode", "message"],
+  "additionalProperties": false,
+  "properties": {
+    "ok": {
+      "type": "boolean",
+      "const": false
+    },
+    "errorCode": {
+      "type": "string",
+      "description": "Stable, machine-readable error code.",
+      "enum": [
+        "GenericInvalidInput",
+        "ArtifactDecodeError",
+        "ArtifactWriteFailed",
+        "UnknownCommand",
+        "SessionNotFound",
+        "SessionWriteFailed",
+        "ListFailed"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "description": "Human-readable message for logs."
+    },
+    "details": {
+      "type": "object",
+      "description": "Optional structured diagnostics payload.",
+      "additionalProperties": true
+    }
+  }
+}
